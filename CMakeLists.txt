@@ -1,9 +1,9 @@
-#   SiddiqSoft CMakeLists 
+#   Generic Process Information
 #   Copyright 2024 Abdulkareem Siddiq. All rights reserved.
 #   See LICENSE file
 #
 #   When building from our CI server, the following options must be set:
-#   - winprocinfo_BUILD_TESTS=ON
+#   - genericprocinfo_BUILD_TESTS=ON
 #   - CI_BUILDID must be set to the gitversion
 # 
 cmake_minimum_required(VERSION 3.29)
@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.29)
 include(pack/CMakeCommonHelpers.cmake)
 
 # Project metadata
-project(winprocinfo
+project(genericprocinfo
         VERSION         "${CURRENT_PROJECT_VERSION}"
         LANGUAGES       CXX
         HOMEPAGE_URL    "%%myurl%%"

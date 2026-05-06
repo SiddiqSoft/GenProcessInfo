@@ -36,8 +36,6 @@ if(${PROJECT_NAME}_BUILD_TESTS)
         GTest::gtest_main
         ${PROJECT_NAME}::${PROJECT_NAME}
         nlohmann_json::nlohmann_json
-        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:CURL::libcurl>
-        $<$<CXX_COMPILER_ID:MSVC>:acw32h::acw32h>
     )
 
     # Register tests with CTest

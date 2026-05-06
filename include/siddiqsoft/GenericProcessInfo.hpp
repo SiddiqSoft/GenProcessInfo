@@ -44,54 +44,54 @@
 #include <sstream>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
-	#include <Windows.h>
-	#include <Psapi.h>
-	#include <tlhelp32.h>
-	#pragma comment(lib, "psapi.lib")
-	#define SIDDIQSOFT_WINDOWS 1
+#include <Windows.h>
+#include <Psapi.h>
+#include <tlhelp32.h>
+#pragma comment(lib, "psapi.lib")
+#define SIDDIQSOFT_WINDOWS 1
 #elif defined(__unix__) || defined(__APPLE__) || defined(__linux__)
-	#include <unistd.h>
-	#include <sys/types.h>
-	#include <sys/resource.h>
-	#include <sys/utsname.h>
-	#include <dirent.h>
-	#include <cstring>
-	#define SIDDIQSOFT_UNIX 1
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/utsname.h>
+#include <dirent.h>
+#include <cstring>
+#define SIDDIQSOFT_UNIX 1
 #endif
 
 namespace siddiqsoft
 {
 	/// @brief Provides process information including CPU, memory, and system details.
-	/// 
+	///
 	/// This class captures and maintains information about the current process, including
 	/// CPU cores, handles/file descriptors, threads, memory usage, and system hostname/domain information.
 	/// Memory and thread snapshots are expensive operations and should be called sparingly.
-	/// 
+	///
 	/// Supports Windows, Linux, macOS, and other Unix-like systems with feature parity.
-	class WinProcessInfo
+	class GenericProcessInfo
 	{
 	public:
-		unsigned long                         cpuCores {0};                ///< Number of CPU cores available
-		unsigned long                         cpuHandles {0};              ///< Number of handles/file descriptors used by the process
-		unsigned long                         cpuThreads {0};              ///< Number of threads in the process
-		size_t                                memPeakWorkingSet {0};        ///< Peak working set memory in KB
-		size_t                                memWorkingSet {0};            ///< Current working set memory in KB
-		size_t                                memPrivate {0};               ///< Private memory usage in KB
-		std::string                           nameHostname {};              ///< DNS hostname
-		std::string                           nameDomainName {};            ///< Domain name
-		std::string                           nameHostnamePhysical {};      ///< Physical DNS hostname
-		std::string                           nameFqdn {};                  ///< Fully qualified domain name
+		unsigned long                         cpuCores {0};            ///< Number of CPU cores available
+		unsigned long                         cpuHandles {0};          ///< Number of handles/file descriptors used by the process
+		unsigned long                         cpuThreads {0};          ///< Number of threads in the process
+		size_t                                memPeakWorkingSet {0};   ///< Peak working set memory in KB
+		size_t                                memWorkingSet {0};       ///< Current working set memory in KB
+		size_t                                memPrivate {0};          ///< Private memory usage in KB
+		std::string                           nameHostname {};         ///< DNS hostname
+		std::string                           nameDomainName {};       ///< Domain name
+		std::string                           nameHostnamePhysical {}; ///< Physical DNS hostname
+		std::string                           nameFqdn {};             ///< Fully qualified domain name
 		std::chrono::system_clock::time_point timeStartup {std::chrono::system_clock::now()}; ///< Process startup time
-		unsigned long                         processId {0};               ///< Current process ID
+		unsigned long                         processId {0};                                  ///< Current process ID
 #if defined(SIDDIQSOFT_WINDOWS)
-		HANDLE                                processHandle {NULL};        ///< Handle to the current process (Windows only)
+		HANDLE processHandle {NULL}; ///< Handle to the current process (Windows only)
 #endif
 
 	public:
 		/// @brief Default constructor that initializes process information.
-		/// 
+		///
 		/// Captures system information including CPU cores, process ID, and hostname details.
-		WinProcessInfo()
+		GenericProcessInfo()
 		{
 #if defined(SIDDIQSOFT_WINDOWS)
 			initializeWindows();
@@ -101,7 +101,7 @@ namespace siddiqsoft
 		}
 
 		/// @brief Destructor that cleans up resources.
-		~WinProcessInfo() noexcept
+		~GenericProcessInfo() noexcept
 		{
 #if defined(SIDDIQSOFT_WINDOWS)
 			if (processHandle != NULL) {
@@ -111,15 +111,15 @@ namespace siddiqsoft
 		}
 
 		// Delete copy operations - single ownership semantics
-		WinProcessInfo(const WinProcessInfo&) = delete;
-		WinProcessInfo& operator=(const WinProcessInfo&) = delete;
+		GenericProcessInfo(const GenericProcessInfo&)            = delete;
+		GenericProcessInfo& operator=(const GenericProcessInfo&) = delete;
 
 		// Delete move operations - prevents accidental misuse
-		WinProcessInfo(WinProcessInfo&&) = delete;
-		WinProcessInfo& operator=(WinProcessInfo&&) = delete;
+		GenericProcessInfo(GenericProcessInfo&&)            = delete;
+		GenericProcessInfo& operator=(GenericProcessInfo&&) = delete;
 
 		/// @brief Collects a snapshot of memory, handle, and thread count information.
-		/// 
+		///
 		/// This method is expensive and should be called sparingly. Consider using a
 		/// low-priority background thread to measure these statistics periodically.
 		void snapshot() noexcept
@@ -129,12 +129,22 @@ namespace siddiqsoft
 		}
 
 		/// @brief Calculates the uptime for this application.
-		/// 
+		///
 		/// @return Duration representing the elapsed time since process startup.
 		///         Cast appropriately via duration_cast<> for desired precision.
 		[[nodiscard]] std::chrono::system_clock::duration uptime() const noexcept
 		{
 			return std::chrono::system_clock::now() - timeStartup;
+		}
+
+		/// @brief Get the current process ID in a cross-platform manner
+		static auto getCurrentProcessId() noexcept
+		{
+#if defined(SIDDIQSOFT_WINDOWS)
+			return GetCurrentProcessId();
+#else
+			return getpid();
+#endif
 		}
 
 	private:
@@ -147,7 +157,7 @@ namespace siddiqsoft
 			// Store one-time information
 			processId = GetCurrentProcessId();
 			GetSystemInfo(&sysInfo);
-			cpuCores = sysInfo.dwNumberOfProcessors;
+			cpuCores      = sysInfo.dwNumberOfProcessors;
 
 			processHandle = GetCurrentProcess();
 
@@ -177,10 +187,10 @@ namespace siddiqsoft
 		}
 
 		/// @brief Collects the memory information for this process on Windows.
-		/// 
+		///
 		/// Retrieves process memory counters including peak working set, current working set,
 		/// and private memory usage. Also updates the handle count.
-		/// 
+		///
 		/// @see http://msdn.microsoft.com/en-us/library/windows/desktop/ms682050(v=vs.85).aspx
 		void getMemoryInfo() noexcept
 		{
@@ -191,7 +201,7 @@ namespace siddiqsoft
 			memWorkingSet     = pmcInfo.WorkingSetSize / 1024;
 			memPrivate        = pmcInfo.PrivateUsage / 1024;
 
-			cpuHandles = 0;
+			cpuHandles        = 0;
 			GetProcessHandleCount(processHandle, &cpuHandles);
 		}
 
@@ -230,7 +240,7 @@ namespace siddiqsoft
 			// Get hostname information
 			char hostname_buf[256] = {0};
 			if (gethostname(hostname_buf, sizeof(hostname_buf)) == 0) {
-				nameHostname = hostname_buf;
+				nameHostname         = hostname_buf;
 				nameHostnamePhysical = hostname_buf;
 			}
 
@@ -250,7 +260,7 @@ namespace siddiqsoft
 		}
 
 		/// @brief Collects the memory information for this process on Unix/Linux.
-		/// 
+		///
 		/// Reads from /proc/self/status and /proc/self/stat to gather memory and thread information.
 		void getMemoryInfo() noexcept
 		{
@@ -288,7 +298,7 @@ namespace siddiqsoft
 			if (getrusage(RUSAGE_SELF, &usage) == 0) {
 				// ru_maxrss is in bytes on macOS
 				memPeakWorkingSet = usage.ru_maxrss / 1024;
-				memWorkingSet = usage.ru_maxrss / 1024;
+				memWorkingSet     = usage.ru_maxrss / 1024;
 			}
 
 			// Count file descriptors on macOS
@@ -307,14 +317,14 @@ namespace siddiqsoft
 			// Generic Unix fallback using getrusage
 			struct rusage usage {};
 			if (getrusage(RUSAGE_SELF, &usage) == 0) {
-				// ru_maxrss is in kilobytes on some systems, bytes on others
-				#if defined(__linux__)
-					memPeakWorkingSet = usage.ru_maxrss;
-					memWorkingSet = usage.ru_maxrss;
-				#else
-					memPeakWorkingSet = usage.ru_maxrss / 1024;
-					memWorkingSet = usage.ru_maxrss / 1024;
-				#endif
+// ru_maxrss is in kilobytes on some systems, bytes on others
+#if defined(__linux__)
+				memPeakWorkingSet = usage.ru_maxrss;
+				memWorkingSet     = usage.ru_maxrss;
+#else
+				memPeakWorkingSet = usage.ru_maxrss / 1024;
+				memWorkingSet     = usage.ru_maxrss / 1024;
+#endif
 			}
 #endif
 		}
@@ -350,67 +360,68 @@ namespace siddiqsoft
 #endif // Platform-specific implementations
 	};
 
+	// Backward compatibility alias
+	using WinProcessInfo = GenericProcessInfo;
 
 #if defined INCLUDE_NLOHMANN_JSON_HPP_
 	/// @brief Serializer for nlohmann::json library
 	/// @param dest The destination target
-	/// @param wpi Our source object
-	static void to_json(nlohmann::json& dest, const WinProcessInfo& wpi)
+	/// @param gpi Our source object
+	static void to_json(nlohmann::json& dest, const GenericProcessInfo& gpi)
 	{
-		dest = nlohmann::json
-		{
-			{"processId", wpi.processId}, {"hostname", wpi.nameHostname}, {"fqdn", wpi.nameFqdn}, {"domain", wpi.nameDomainName},
-					 {"localFqdn", wpi.nameHostnamePhysical},
-					{"cpuHandles", wpi.cpuHandles}, {"cpuThreads", wpi.cpuThreads},
-					{"cpuCores", wpi.cpuCores}, {"memPeakWorkingSet", wpi.memPeakWorkingSet}, {"memWorkingSet", wpi.memWorkingSet},
-					{"memPrivateBytes", wpi.memPrivate},
+		dest = nlohmann::json {{"processId", gpi.processId},
+		                       {"hostname", gpi.nameHostname},
+		                       {"fqdn", gpi.nameFqdn},
+		                       {"domain", gpi.nameDomainName},
+		                       {"localFqdn", gpi.nameHostnamePhysical},
+		                       {"cpuHandles", gpi.cpuHandles},
+		                       {"cpuThreads", gpi.cpuThreads},
+		                       {"cpuCores", gpi.cpuCores},
+		                       {"memPeakWorkingSet", gpi.memPeakWorkingSet},
+		                       {"memWorkingSet", gpi.memWorkingSet},
+		                       {"memPrivateBytes", gpi.memPrivate},
 #if __cpp_lib_format
-					{"timeStartup", std::format("{:%FT%T}Z", wpi.timeStartup)},
-					{"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
+		                       {"timeStartup", std::format("{:%FT%T}Z", gpi.timeStartup)},
+		                       {"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
 #endif
-			{
-				"uptime", std::chrono::duration_cast<std::chrono::microseconds>(wpi.uptime()).count()
-			}
-		};
+		                       {"uptime", std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count()}};
 	}
 #endif
 } // namespace siddiqsoft
 
 
-/// @brief Specialization of std::formatter for WinProcessInfo objects.
+/// @brief Specialization of std::formatter for GenericProcessInfo objects.
 template <class charT>
-struct std::formatter<siddiqsoft::WinProcessInfo, charT> : std::formatter<std::string, charT>
+struct std::formatter<siddiqsoft::GenericProcessInfo, charT> : std::formatter<std::string, charT>
 {
-	/// @brief Format a WinProcessInfo object using the standard format interface.
+	/// @brief Format a GenericProcessInfo object using the standard format interface.
 	template <class FC>
-	auto format(const siddiqsoft::WinProcessInfo& wpi, FC& ctx) const
+	auto format(const siddiqsoft::GenericProcessInfo& gpi, FC& ctx) const
 	{
 #if defined INCLUDE_NLOHMANN_JSON_HPP_
-		return std::formatter<std::string, charT>::format(nlohmann::json(wpi).dump(), ctx);
+		return std::formatter<std::string, charT>::format(nlohmann::json(gpi).dump(), ctx);
 #else
 		std::string s;
 
 		// First element
-		std::format_to(std::back_inserter(s), "{{\"processId\":{}", wpi.processId);
-		std::format_to(std::back_inserter(s), ",\"hostname\":\"{}\",", wpi.nameHostname);
-		std::format_to(std::back_inserter(s), ",\"domain\":\"{}\",", wpi.nameDomainName);
-		std::format_to(std::back_inserter(s), ",\"fqdn\":\"{}\",", wpi.nameFqdn);
-		std::format_to(std::back_inserter(s), ",\"localFqdn\":\"{}\",", wpi.nameHostnamePhysical);
-		std::format_to(std::back_inserter(s), ",\"cpuHandles\":{},", wpi.cpuHandles);
-		std::format_to(std::back_inserter(s), ",\"cpuThreads\":{},", wpi.cpuThreads);
-		std::format_to(std::back_inserter(s), ",\"cpuCores\":{},", wpi.cpuCores);
-		std::format_to(std::back_inserter(s), ",\"memPeakWorkingSet\":{},", wpi.memPeakWorkingSet);
-		std::format_to(std::back_inserter(s), ",\"memWorkingSet\":{},", wpi.memWorkingSet);
-		std::format_to(std::back_inserter(s), ",\"memPrivateBytes\":{},", wpi.memPrivate);
-		std::format_to(std::back_inserter(s), ",\"timeStartup\":\"{:%FT%T}Z\"", wpi.timeStartup);
+		std::format_to(std::back_inserter(s), "{{\"processId\":{}", gpi.processId);
+		std::format_to(std::back_inserter(s), ",\"hostname\":\"{}\",", gpi.nameHostname);
+		std::format_to(std::back_inserter(s), ",\"domain\":\"{}\",", gpi.nameDomainName);
+		std::format_to(std::back_inserter(s), ",\"fqdn\":\"{}\",", gpi.nameFqdn);
+		std::format_to(std::back_inserter(s), ",\"localFqdn\":\"{}\",", gpi.nameHostnamePhysical);
+		std::format_to(std::back_inserter(s), ",\"cpuHandles\":{},", gpi.cpuHandles);
+		std::format_to(std::back_inserter(s), ",\"cpuThreads\":{},", gpi.cpuThreads);
+		std::format_to(std::back_inserter(s), ",\"cpuCores\":{},", gpi.cpuCores);
+		std::format_to(std::back_inserter(s), ",\"memPeakWorkingSet\":{},", gpi.memPeakWorkingSet);
+		std::format_to(std::back_inserter(s), ",\"memWorkingSet\":{},", gpi.memWorkingSet);
+		std::format_to(std::back_inserter(s), ",\"memPrivateBytes\":{},", gpi.memPrivate);
+		std::format_to(std::back_inserter(s), ",\"timeStartup\":\"{:%FT%T}Z\"", gpi.timeStartup);
 		std::format_to(std::back_inserter(s), ",\"timeCurrent\":\"{:%FT%T}Z\"", std::chrono::system_clock::now());
 		// last element
 		std::format_to(std::back_inserter(s),
 		               ",\"uptime\":{}}}",
-		               std::chrono::duration_cast<std::chrono::microseconds>(wpi.uptime()).count());
+		               std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count());
 		return std::formatter<std::string, charT>::format(s, ctx);
 #endif
 	}
 };
-
-#endif
