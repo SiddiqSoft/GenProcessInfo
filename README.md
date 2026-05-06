@@ -8,61 +8,23 @@ ProcessInfo : Cross-Platform Process Information
 ![](https://img.shields.io/azure-devops/tests/siddiqsoft/siddiqsoft/12)
 ![](https://img.shields.io/azure-devops/coverage/siddiqsoft/siddiqsoft/12)
 
-# Objective
+ ## Overview
 
-Provide for a simple "stats" for a daemon/service without the heft of the full process information library.
+A header-only C++23 library providing cross-platform process information with minimal footprint. Captures CPU, memory, and system details for the current process.
 
-- Minimal footprint
-- Serializer for nlohmann::json (you must include the library prior to this header file)
-- Serializer for std::format (if supported by your compiler)
+**Features:**
+- Minimal footprint - header-only library
+- Cross-platform support (Windows, Linux, macOS, Unix)
+- JSON serialization via `nlohmann::json`
+- `std::format` support for easy output
+- Single ownership semantics
 
+## Quick Start
 
-# Platform Support
+### Installation
 
-This library supports the following platforms:
-- **Windows** (Windows 7 and later)
-- **Linux** (with /proc filesystem support)
-- **macOS** (10.5 and later)
-- **Unix-like systems** (with standard POSIX APIs)
-
-# Requirements
-
-## Compiler Requirements
-- **C++23 or later** - The library requires C++23 for full functionality including `std::format` support
-- Tested with:
-  - MSVC (Visual Studio 2022 or later)
-  - GCC 13 or later
-  - Clang 17 or later (with `-fexperimental-library` flag for experimental features)
-
-## Dependencies
-- **Optional**: [`nlohmann::json`](https://github.com/nlohmann/json) - Only required for JSON serialization in tests. The library automatically detects and provides a conversion operator if included.
-- **Optional**: `std::format` - Used for formatting output when available (C++20+)
-
-## Platform Requirements
-- **Windows**: Windows 7 or later
-- **Linux**: Kernel with `/proc` filesystem support
-- **macOS**: 10.5 or later  **LIMITED SUPPORT**
-- **Unix-like systems**: POSIX-compliant systems with standard APIs **NOT TESTED**
-
-# Usage
-
-## CMake with CPM (Recommended)
-
-Add the following to your `CMakeLists.txt`:
-
-```cmake
-include(FetchContent)
-FetchContent_Declare(genericprocinfo
-    GIT_REPOSITORY https://github.com/SiddiqSoft/WinProcessInfo.git
-    GIT_TAG main
-)
-FetchContent_MakeAvailable(genericprocinfo)
-
-# Link to your target
-target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
-```
-
-Or using CPM directly:
+<details>
+<summary><b>CMake with CPM (Recommended)</b></summary>
 
 ```cmake
 include(CPM)
@@ -71,118 +33,139 @@ CPMAddPackage(
     GITHUB_REPOSITORY SiddiqSoft/WinProcessInfo
     GIT_TAG main
 )
-
 target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
 ```
+</details>
 
-## NuGet (Windows/.NET)
-
-- Use the nuget package [SiddiqSoft.WinProcessInfo](https://www.nuget.org/packages/SiddiqSoft.WinProcessInfo/)
-
-## Manual Integration
-
-- Copy the `include/siddiqsoft/GenericProcessInfo.hpp` header file to your project
-
-## Interface
+<details>
+<summary><b>NuGet (Windows)</b></summary>
 
 ```
-GenericProcessInfo (also available as WinProcessInfo for backward compatibility)
-- uptime()                    // Returns elapsed time since process startup
-- snapshot()                  // Captures memory, handle, and thread information (expensive operation)
-- getCurrentProcessId()       // Static method to get current process ID (cross-platform)
-- serializer for nlohmann::json
-- serializer for std::format
+Install-Package SiddiqSoft.WinProcessInfo
 ```
+</details>
 
-## Cross-Platform Implementation
+<details>
+<summary><b>Manual</b></summary>
 
-The library provides consistent behavior across all supported platforms:
+Copy `include/siddiqsoft/GenericProcessInfo.hpp` to your project.
+</details>
 
-### Windows
-- Uses Windows API (`GetProcessMemoryInfo`, `CreateToolhelp32Snapshot`, etc.)
-- Retrieves handle count via `GetProcessHandleCount`
-- Thread count obtained from process snapshot
-
-### Linux
-- Reads from `/proc/self/status` for memory and thread information
-- File descriptor count from `/proc/self/status`
-- CPU core count via `sysconf(_SC_NPROCESSORS_ONLN)`
-
-### macOS
-- Uses `getrusage()` for memory information
-- File descriptor enumeration via `/dev/fd`
-- Hostname information via standard POSIX APIs
-
-### Unix-like Systems
-- Generic fallback using `getrusage()` and POSIX APIs
-- Hostname resolution via `gethostname()` and `uname()`
-
-## Example
+### Basic Usage
 
 ```cpp
-#include "gtest/gtest.h"
+#include "siddiqsoft/GenericProcessInfo.hpp"
+
+int main() {
+    siddiqsoft::GenericProcessInfo procInfo;
+    
+    // Basic info available immediately
+    std::cout << "Process ID: " << procInfo.processId << "\n";
+    std::cout << "CPU Cores: " << procInfo.cpuCores << "\n";
+    
+    // Expensive operation - call sparingly
+    procInfo.snapshot();
+    std::cout << "Memory: " << procInfo.memWorkingSet << " KB\n";
+    std::cout << "Threads: " << procInfo.cpuThreads << "\n";
+    
+    return 0;
+}
+```
+
+<details>
+<summary><b>JSON Output Example</b></summary>
+
+```cpp
 #include <format>
 #include "nlohmann/json.hpp"
 #include "siddiqsoft/GenericProcessInfo.hpp"
 
-TEST(examples, Example2)
-{
-   try {
-      siddiqsoft::GenericProcessInfo procInfo;
-
-      // We must perform the snapshot to obtain memory and thread usage
-      procInfo.snapshot();
-
-      // tip: do not use brace-init/assignment as it will create an array instead of object!
-      nlohmann::json info(procInfo);
-
-      std::cerr << info.dump() << std::endl;
-      EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), info.value("processId", 0));
-   }
-   catch (std::exception& e) {
-      EXPECT_TRUE(false) << e.what(); // if we throw then the test fails.
-   }
-}
-
-```
-
-
-## Output
- Member Field | json Field | Comments
--------------:|:----------:|:-------------------
-cpuCores | `cpuCount` | Number of cores/cpu
-cpuHandles | `cpuHandles` | Handle count
-cpuThreads | `cpuThreads` | Thread count. _This is expensive._
-memPeakWorkingSet | `memPeakWorkingSet` | Peak virtual working memory in Kbytes.
-memWorkingSet | `memWorkingSet` | Current working set in Kbytes.
-memPrivate | `memPrivate` | Current physically allocated memory for this process in Kbytes.
-nameHostname | `hostname` | The local hostname
-nameDomainName | `domain` | The fully qualified domain portion
-nameHostnamePhysical | `localFqdn` | The local physical hostname
-nameFqdn | `fqdn` | The fully qualified dns name
-processId | `processId` | The process id
-timeStartup | `timeStartup` | The startup timestamp as ISO 8601 format. _This is the time of instance of this object._
-&nbsp; | `timeCurrent` | The current timestamp as ISO 8601 format when the serialization took place.
-&nbsp; | `uptime` | The number of _microseconds_ between the `timeStartup` and `timeCurrent`.<br/>Use the method `uptime()` and `duration_cast<>` to your desired ratio.
-
-```json
-{
-    "cpuCores": 8,
-    "cpuHandles": 48,
-    "cpuThreads": 4,
-    "domain": "",
-    "fqdn": "istanbul",
-    "hostname": "istanbul",
-    "localFqdn": "istanbul",
-    "memPeakWorkingSet": 42960, // KBytes
-    "memPrivateBytes": 84452,   // Kbytes
-    "memWorkingSet": 42584,     // Kbytes
-    "processId": 10828,
-    "timeCurrent": "2021-07-30T06:43:54.8649027Z",
-    "timeStartup": "2021-07-30T06:43:54.8599558Z",
-    "uptime": 5124              // Microseconds
+int main() {
+    siddiqsoft::GenericProcessInfo procInfo;
+    procInfo.snapshot();
+    
+    nlohmann::json j = procInfo;
+    std::cout << j.dump(2) << "\n";
+    
+    return 0;
 }
 ```
+</details>
+
+## Requirements
+
+- **C++23 or later** (MSVC 2022+, GCC 13+, Clang 17+)
+- **Windows 7+**, **Linux** (with /proc), **macOS 10.5+**, or **POSIX-compliant systems**
+- Optional: `nlohmann::json` for JSON serialization
+
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Windows | ✓ Full | Windows 7 and later |
+| Linux | ✓ Full | Requires /proc filesystem |
+| macOS | ⚠ Limited | Thread count limited (requires Mach APIs) |
+| Unix | ⚠ Limited | Generic POSIX fallback |
+
+## API Reference
+
+See [API.md](API.md) for comprehensive documentation including:
+- All public members and methods
+- Detailed parameter descriptions
+- Platform-specific behavior
+- Performance considerations
+- Complete usage examples
+- Thread safety notes
+
+## Key Methods
+
+| Method | Description | Cost |
+|--------|-------------|------|
+| `snapshot()` | Capture memory, handles, and thread count | Expensive |
+| `uptime()` | Get elapsed time since object creation | Cheap |
+| `getCurrentProcessId()` | Get current process ID (static) | Cheap |
+
+## Key Members
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `processId` | `unsigned long` | Current process ID |
+| `cpuCores` | `unsigned long` | Available CPU cores |
+| `cpuThreads` | `unsigned long` | Process thread count |
+| `cpuHandles` | `unsigned long` | Open handles/file descriptors |
+| `memWorkingSet` | `size_t` | Current memory in KB |
+| `memPeakWorkingSet` | `size_t` | Peak memory in KB |
+| `memPrivate` | `size_t` | Private memory in KB |
+| `nameHostname` | `std::string` | DNS hostname |
+| `nameFqdn` | `std::string` | Fully qualified domain name |
+
+See [API.md](API.md) for complete member documentation.
+
+<details>
+<summary><b>Performance Tips</b></summary>
+
+1. **Reuse instances** - Create once, call `snapshot()` periodically
+2. **Background thread** - Call `snapshot()` in a low-priority background thread
+3. **Cache results** - Store values if frequent access is needed
+4. **Avoid copies** - Copy/move operations are deleted (single ownership)
+</details>
+
+<details>
+<summary><b>Backward Compatibility</b></summary>
+
+The library provides `WinProcessInfo` as an alias for `GenericProcessInfo`:
+```cpp
+siddiqsoft::WinProcessInfo procInfo;  // Legacy name still works
+```
+</details>
+
+<details>
+<summary><b>License</b></summary>
+
+BSD 3-Clause License - See [LICENSE](LICENSE) file
+</details>
+
+---
 
 <small align="right">
 

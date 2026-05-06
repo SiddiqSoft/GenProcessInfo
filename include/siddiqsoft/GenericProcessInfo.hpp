@@ -2,7 +2,7 @@
     ProcessInfo : Cross-Platform Process Information
     Version 2
 
-    https://github.com/SiddiqSoft/WinProcessInfo
+    https://github.com/SiddiqSoft/GenProcessInfo
 
     BSD 3-Clause License
 
