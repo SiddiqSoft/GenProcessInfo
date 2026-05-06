@@ -37,7 +37,6 @@
 
 #include "gtest/gtest.h"
 #include <format>
-#include <unistd.h>
 #include <thread>
 #include <sstream>
 #include "nlohmann/json.hpp"

@@ -1,5 +1,5 @@
 /*
-    WinProcessInfo : Windows Process Information
+    GenericProcInfo : Windows/Linux Process Information
     Version 2
 
     https://github.com/SiddiqSoft/WinProcessInfo
