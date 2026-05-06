@@ -1,2 +1,0 @@
-/Users/maas/source/repos/siddiqsoft/WinProcessInfo/build/Apple-Debug/CMakeFiles/edit_cache.dir
-/Users/maas/source/repos/siddiqsoft/WinProcessInfo/build/Apple-Debug/CMakeFiles/rebuild_cache.dir
