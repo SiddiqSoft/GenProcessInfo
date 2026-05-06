@@ -48,16 +48,16 @@ Install-Package SiddiqSoft.WinProcessInfo
 <details>
 <summary><b>Manual</b></summary>
 
-Copy `include/siddiqsoft/GenericProcessInfo.hpp` to your project.
+Copy `include/siddiqsoft/GenProcessInfo.hpp` to your project.
 </details>
 
 ### Basic Usage
 
 ```cpp
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     
     // Basic info available immediately
     std::cout << "Process ID: " << procInfo.processId << "\n";
@@ -78,10 +78,10 @@ int main() {
 ```cpp
 #include <format>
 #include "nlohmann/json.hpp"
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     procInfo.snapshot();
     
     nlohmann::json j = procInfo;
@@ -153,7 +153,7 @@ See [API.md](API.md) for complete member documentation.
 <details>
 <summary><b>Backward Compatibility</b></summary>
 
-The library provides `WinProcessInfo` as an alias for `GenericProcessInfo`:
+The library provides `WinProcessInfo` as an alias for `GenProcessInfo`:
 ```cpp
 siddiqsoft::WinProcessInfo procInfo;  // Legacy name still works
 ```

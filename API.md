@@ -1,8 +1,8 @@
-# GenericProcessInfo API Documentation
+# GenProcessInfo API Documentation
 
 ## Overview
 
-`GenericProcessInfo` is a header-only C++23 library that provides cross-platform process information including CPU, memory, and system details. The class captures and maintains information about the current process with minimal overhead.
+`GenProcessInfo` is a header-only C++23 library that provides cross-platform process information including CPU, memory, and system details. The class captures and maintains information about the current process with minimal overhead.
 
 **Namespace**: `siddiqsoft`
 
@@ -10,7 +10,7 @@
 
 ---
 
-## Class: GenericProcessInfo
+## Class: GenProcessInfo
 
 ### Public Members
 
@@ -112,7 +112,7 @@
 #### Time Information
 
 ##### `std::chrono::system_clock::time_point timeStartup`
-- **Description**: Timestamp when this GenericProcessInfo instance was created
+- **Description**: Timestamp when this GenProcessInfo instance was created
 - **Type**: `std::chrono::system_clock::time_point`
 - **Initialized**: During construction (current system time)
 - **Note**: This is NOT the process startup time, but the time of object instantiation
@@ -141,7 +141,7 @@
 #### Constructor
 
 ```cpp
-GenericProcessInfo()
+GenProcessInfo()
 ```
 
 - **Description**: Default constructor that initializes process information
@@ -152,7 +152,7 @@ GenericProcessInfo()
 - **Exceptions**: None (noexcept)
 - **Example**:
   ```cpp
-  siddiqsoft::GenericProcessInfo procInfo;
+  siddiqsoft::GenProcessInfo procInfo;
   // procInfo now contains CPU cores, process ID, hostname, etc.
   // But memory and thread info are still 0
   ```
@@ -160,7 +160,7 @@ GenericProcessInfo()
 #### Destructor
 
 ```cpp
-~GenericProcessInfo() noexcept
+~GenProcessInfo() noexcept
 ```
 
 - **Description**: Destructor that cleans up resources
@@ -186,7 +186,7 @@ void snapshot() noexcept
   - Updates: `memPeakWorkingSet`, `memWorkingSet`, `memPrivate`, `cpuHandles`, `cpuThreads`
 - **Example**:
   ```cpp
-  siddiqsoft::GenericProcessInfo procInfo;
+  siddiqsoft::GenProcessInfo procInfo;
   procInfo.snapshot();  // Now memory and thread info are populated
   std::cout << "Memory: " << procInfo.memWorkingSet << " KB\n";
   std::cout << "Threads: " << procInfo.cpuThreads << "\n";
@@ -198,7 +198,7 @@ void snapshot() noexcept
 [[nodiscard]] std::chrono::system_clock::duration uptime() const noexcept
 ```
 
-- **Description**: Calculates the elapsed time since this GenericProcessInfo instance was created
+- **Description**: Calculates the elapsed time since this GenProcessInfo instance was created
 - **Return**: `std::chrono::system_clock::duration` - Duration representing elapsed time
 - **Exceptions**: None (noexcept)
 - **Attributes**: `[[nodiscard]]` - Compiler will warn if return value is ignored
@@ -206,7 +206,7 @@ void snapshot() noexcept
 - **Usage**: Cast to desired precision using `std::chrono::duration_cast<>`
 - **Example**:
   ```cpp
-  siddiqsoft::GenericProcessInfo procInfo;
+  siddiqsoft::GenProcessInfo procInfo;
   // ... do some work ...
   auto elapsed = procInfo.uptime();
   auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
@@ -227,7 +227,7 @@ static auto getCurrentProcessId() noexcept
 - **Static**: Yes - can be called without creating an instance
 - **Example**:
   ```cpp
-  auto pid = siddiqsoft::GenericProcessInfo::getCurrentProcessId();
+  auto pid = siddiqsoft::GenProcessInfo::getCurrentProcessId();
   std::cout << "Process ID: " << pid << "\n";
   ```
 
@@ -238,10 +238,10 @@ static auto getCurrentProcessId() noexcept
 The following operations are explicitly deleted to enforce single ownership semantics:
 
 ```cpp
-GenericProcessInfo(const GenericProcessInfo&)            = delete;
-GenericProcessInfo& operator=(const GenericProcessInfo&) = delete;
-GenericProcessInfo(GenericProcessInfo&&)                 = delete;
-GenericProcessInfo& operator=(GenericProcessInfo&&)      = delete;
+GenProcessInfo(const GenProcessInfo&)            = delete;
+GenProcessInfo& operator=(const GenProcessInfo&) = delete;
+GenProcessInfo(GenProcessInfo&&)                 = delete;
+GenProcessInfo& operator=(GenProcessInfo&&)      = delete;
 ```
 
 - **Copy Constructor**: Deleted - prevents copying
@@ -256,13 +256,13 @@ GenericProcessInfo& operator=(GenericProcessInfo&&)      = delete;
 
 ### JSON Serialization (nlohmann::json)
 
-When `nlohmann/json.hpp` is included **before** `GenericProcessInfo.hpp`, automatic JSON serialization is available:
+When `nlohmann/json.hpp` is included **before** `GenProcessInfo.hpp`, automatic JSON serialization is available:
 
 ```cpp
 #include "nlohmann/json.hpp"
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
-siddiqsoft::GenericProcessInfo procInfo;
+siddiqsoft::GenProcessInfo procInfo;
 procInfo.snapshot();
 
 nlohmann::json j = procInfo;  // Automatic conversion
@@ -309,13 +309,13 @@ std::cout << j.dump(2) << "\n";
 
 ### std::format Serialization
 
-When using C++23 `std::format`, GenericProcessInfo can be formatted directly:
+When using C++23 `std::format`, GenProcessInfo can be formatted directly:
 
 ```cpp
 #include <format>
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
-siddiqsoft::GenericProcessInfo procInfo;
+siddiqsoft::GenProcessInfo procInfo;
 procInfo.snapshot();
 
 std::cout << std::format("Process Info: {}\n", procInfo);
@@ -330,10 +330,10 @@ std::cout << std::format("Process Info: {}\n", procInfo);
 ### Basic Usage
 
 ```cpp
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     
     // Access basic information (available immediately)
     std::cout << "Process ID: " << procInfo.processId << "\n";
@@ -347,10 +347,10 @@ int main() {
 ### With Memory and Thread Snapshot
 
 ```cpp
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     
     // Perform expensive snapshot operation
     procInfo.snapshot();
@@ -368,10 +368,10 @@ int main() {
 
 ```cpp
 #include <chrono>
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     
     // ... do some work ...
     
@@ -389,10 +389,10 @@ int main() {
 ```cpp
 #include <format>
 #include "nlohmann/json.hpp"
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     procInfo.snapshot();
     
     nlohmann::json j = procInfo;
@@ -406,10 +406,10 @@ int main() {
 
 ```cpp
 #include <format>
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 int main() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     procInfo.snapshot();
     
     std::cout << std::format("Process Info: {}\n", procInfo);
@@ -423,10 +423,10 @@ int main() {
 ```cpp
 #include <thread>
 #include <chrono>
-#include "siddiqsoft/GenericProcessInfo.hpp"
+#include "siddiqsoft/GenProcessInfo.hpp"
 
 void monitorProcess() {
-    siddiqsoft::GenericProcessInfo procInfo;
+    siddiqsoft::GenProcessInfo procInfo;
     
     while (true) {
         procInfo.snapshot();  // Expensive operation
@@ -493,7 +493,7 @@ int main() {
 - **Memory access**: All member variables are public and directly accessible
 
 ### Optimization Tips
-1. Create a single `GenericProcessInfo` instance and reuse it
+1. Create a single `GenProcessInfo` instance and reuse it
 2. Call `snapshot()` in a low-priority background thread
 3. Cache results if frequent access is needed
 4. Use `uptime()` instead of creating new instances for timing
@@ -513,13 +513,13 @@ int main() {
 The library provides a type alias for backward compatibility:
 
 ```cpp
-using WinProcessInfo = GenericProcessInfo;
+using WinProcessInfo = GenProcessInfo;
 ```
 
 Legacy code can use either name:
 ```cpp
 siddiqsoft::WinProcessInfo procInfo;  // Old name
-siddiqsoft::GenericProcessInfo procInfo;  // New name
+siddiqsoft::GenProcessInfo procInfo;  // New name
 ```
 
 ---

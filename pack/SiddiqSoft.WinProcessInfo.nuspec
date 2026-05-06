@@ -12,14 +12,14 @@
 		<version>$VERSION$</version>
 		<authors>SiddiqSoft</authors>
 		<description>Windows Process Info utility class</description>
-		<tags>windows process-info cpu-count thread-count memory-use native nativepackage cpp</tags>
-		<projectUrl>https://github.com/SiddiqSoft/WinProcessInfo</projectUrl>
+		<tags>windows linux process-info cpu-count thread-count memory-use native nativepackage cpp</tags>
+		<projectUrl>https://github.com/SiddiqSoft/GenProcessInfo</projectUrl>
 		<requireLicenseAcceptance>true</requireLicenseAcceptance>
 		<license type="expression">BSD-3-Clause</license>
 		<icon>docs\Siddiq-Software-Avatar.png</icon>
 		<readme>docs\README.md</readme>
-		<releaseNotes></releaseNotes>
-		<copyright>Copyright (c) 2021 Siddiq Software LLC</copyright>
+		<releaseNotes>Major change to the API. See documentation https://github.com/SiddiqSoft/GenProcessInfo/blob/main/README.md</releaseNotes>
+		<copyright>Copyright (c) 2026 Siddiq Software LLC</copyright>
 		<!-- Dependencies -->
 		<dependencies>
 		</dependencies>
@@ -33,7 +33,7 @@
 	-->
 	<files>
 		<!-- includes -->
-		<file src="..\src\*.hpp" target="build\native\include\siddiqsoft\" />
+		<file src="..\include\siddiqsoft\*.hpp" target="build\native\include\siddiqsoft\" />
 		<file src="Siddiq-Software-Avatar.png" target="docs\" />
 		<file src="..\README.md" target="docs\" />
 

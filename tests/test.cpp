@@ -1,8 +1,8 @@
 /*
-    GenericProcessInfo : tests
+    GenProcessInfo : tests
     Process Information Tests
 
-    Repo: https://github.com/SiddiqSoft/GenericProcessInfo
+    Repo: https://github.com/SiddiqSoft/GenProcessInfo
 
     BSD 3-Clause License
 
@@ -41,7 +41,7 @@
 #include <thread>
 #include <sstream>
 #include "nlohmann/json.hpp"
-#include "../include/siddiqsoft/GenericProcessInfo.hpp"
+#include "../include/siddiqsoft/GenProcessInfo.hpp"
 
 
 // ============================================================================
@@ -52,10 +52,10 @@ TEST(initialization, DefaultConstructor)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify that basic properties are initialized
-		EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), procInfo.processId);
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), procInfo.processId);
 		EXPECT_GT(procInfo.cpuCores, 0);
 		EXPECT_FALSE(procInfo.nameHostname.empty());
 		EXPECT_FALSE(procInfo.nameFqdn.empty());
@@ -70,7 +70,7 @@ TEST(initialization, HostnameProperties)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify hostname-related properties are populated
 		EXPECT_FALSE(procInfo.nameHostname.empty());
@@ -95,7 +95,7 @@ TEST(initialization, CPUProperties)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify CPU-related properties
 		EXPECT_GT(procInfo.cpuCores, 0);
@@ -113,10 +113,10 @@ TEST(initialization, ProcessIDProperty)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify process ID matches current process
-		EXPECT_EQ(procInfo.processId, siddiqsoft::GenericProcessInfo::getCurrentProcessId());
+		EXPECT_EQ(procInfo.processId, siddiqsoft::GenProcessInfo::getCurrentProcessId());
 		EXPECT_GT(procInfo.processId, 0);
 
 		std::cerr << "Process ID: " << procInfo.processId << std::endl;
@@ -136,7 +136,7 @@ TEST(snapshot, SnapshotCollection)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Perform snapshot
 		procInfo.snapshot();
@@ -162,7 +162,7 @@ TEST(snapshot, MultipleSnapshots)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// Take multiple snapshots
 		procInfo.snapshot();
@@ -192,7 +192,7 @@ TEST(snapshot, HandleCount)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		procInfo.snapshot();
 
@@ -217,7 +217,7 @@ TEST(uptime, UptimeCalculation)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		auto uptime = procInfo.uptime();
 
@@ -238,7 +238,7 @@ TEST(uptime, UptimeIncreases)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		auto uptime1 = procInfo.uptime();
 
@@ -263,7 +263,7 @@ TEST(uptime, UptimeDurationTypes)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		auto uptimeNs = procInfo.uptime();
 		auto uptimeUs = std::chrono::duration_cast<std::chrono::microseconds>(uptimeNs);
@@ -294,7 +294,7 @@ TEST(json, JSONSerialization)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 		procInfo.snapshot();
 
 		nlohmann::json info(procInfo);
@@ -327,13 +327,13 @@ TEST(json, JSONFieldValues)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 		procInfo.snapshot();
 
 		nlohmann::json info(procInfo);
 
 		// Verify field values
-		EXPECT_EQ(info.value("processId", 0), siddiqsoft::GenericProcessInfo::getCurrentProcessId());
+		EXPECT_EQ(info.value("processId", 0), siddiqsoft::GenProcessInfo::getCurrentProcessId());
 		EXPECT_EQ(info.value("hostname", ""), procInfo.nameHostname);
 		EXPECT_EQ(info.value("fqdn", ""), procInfo.nameFqdn);
 		EXPECT_EQ(info.value("cpuCores", 0), procInfo.cpuCores);
@@ -352,7 +352,7 @@ TEST(json, JSONDump)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 		procInfo.snapshot();
 
 		nlohmann::json info(procInfo);
@@ -381,7 +381,7 @@ TEST(formatting, StdFormat)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 		procInfo.snapshot();
 
 		std::string formatted = std::format("{}", procInfo);
@@ -403,7 +403,7 @@ TEST(formatting, StreamOutput)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 		procInfo.snapshot();
 
 		std::ostringstream oss;
@@ -432,32 +432,32 @@ TEST(semantics, NoCopyConstruction)
 {
 	// This test verifies that copy construction is deleted
 	// If this compiles, the test fails
-	static_assert(!std::is_copy_constructible_v<siddiqsoft::GenericProcessInfo>,
-	              "GenericProcessInfo should not be copy constructible");
+	static_assert(!std::is_copy_constructible_v<siddiqsoft::GenProcessInfo>,
+	              "GenProcessInfo should not be copy constructible");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoCopyAssignment)
 {
 	// This test verifies that copy assignment is deleted
-	static_assert(!std::is_copy_assignable_v<siddiqsoft::GenericProcessInfo>,
-	              "GenericProcessInfo should not be copy assignable");
+	static_assert(!std::is_copy_assignable_v<siddiqsoft::GenProcessInfo>,
+	              "GenProcessInfo should not be copy assignable");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoMoveConstruction)
 {
 	// This test verifies that move construction is deleted
-	static_assert(!std::is_move_constructible_v<siddiqsoft::GenericProcessInfo>,
-	              "GenericProcessInfo should not be move constructible");
+	static_assert(!std::is_move_constructible_v<siddiqsoft::GenProcessInfo>,
+	              "GenProcessInfo should not be move constructible");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoMoveAssignment)
 {
 	// This test verifies that move assignment is deleted
-	static_assert(!std::is_move_assignable_v<siddiqsoft::GenericProcessInfo>,
-	              "GenericProcessInfo should not be move assignable");
+	static_assert(!std::is_move_assignable_v<siddiqsoft::GenProcessInfo>,
+	              "GenProcessInfo should not be move assignable");
 	EXPECT_TRUE(true);
 }
 
@@ -470,10 +470,10 @@ TEST(examples, Example1)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		procInfo.snapshot();
-		EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), procInfo.processId);
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), procInfo.processId);
 	}
 	catch (...)
 	{
@@ -485,7 +485,7 @@ TEST(examples, Example2)
 {
 	try
 	{
-		siddiqsoft::GenericProcessInfo procInfo;
+		siddiqsoft::GenProcessInfo procInfo;
 
 		// We must perform the snapshot to obtain memory and thread usage
 		procInfo.snapshot();
@@ -494,7 +494,7 @@ TEST(examples, Example2)
 		nlohmann::json info(procInfo);
 
 		std::cerr << info.dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), info.value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), info.value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)
@@ -513,7 +513,7 @@ TEST(examples, Example3)
 		procInfo.snapshot();
 
 		std::cerr << nlohmann::json(procInfo).dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), nlohmann::json(procInfo).value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), nlohmann::json(procInfo).value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)

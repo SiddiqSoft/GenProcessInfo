@@ -68,7 +68,7 @@ namespace siddiqsoft
 	/// Memory and thread snapshots are expensive operations and should be called sparingly.
 	///
 	/// Supports Windows, Linux, macOS, and other Unix-like systems with feature parity.
-	class GenericProcessInfo
+	class GenProcessInfo
 	{
 	public:
 		unsigned long                         cpuCores {0};            ///< Number of CPU cores available
@@ -91,7 +91,7 @@ namespace siddiqsoft
 		/// @brief Default constructor that initializes process information.
 		///
 		/// Captures system information including CPU cores, process ID, and hostname details.
-		GenericProcessInfo()
+		GenProcessInfo()
 		{
 #if defined(SIDDIQSOFT_WINDOWS)
 			initializeWindows();
@@ -101,7 +101,7 @@ namespace siddiqsoft
 		}
 
 		/// @brief Destructor that cleans up resources.
-		~GenericProcessInfo() noexcept
+		~GenProcessInfo() noexcept
 		{
 #if defined(SIDDIQSOFT_WINDOWS)
 			if (processHandle != NULL) {
@@ -111,12 +111,12 @@ namespace siddiqsoft
 		}
 
 		// Delete copy operations - single ownership semantics
-		GenericProcessInfo(const GenericProcessInfo&)            = delete;
-		GenericProcessInfo& operator=(const GenericProcessInfo&) = delete;
+		GenProcessInfo(const GenProcessInfo&)            = delete;
+		GenProcessInfo& operator=(const GenProcessInfo&) = delete;
 
 		// Delete move operations - prevents accidental misuse
-		GenericProcessInfo(GenericProcessInfo&&)            = delete;
-		GenericProcessInfo& operator=(GenericProcessInfo&&) = delete;
+		GenProcessInfo(GenProcessInfo&&)            = delete;
+		GenProcessInfo& operator=(GenProcessInfo&&) = delete;
 
 		/// @brief Collects a snapshot of memory, handle, and thread count information.
 		///
@@ -361,13 +361,13 @@ namespace siddiqsoft
 	};
 
 	// Backward compatibility alias
-	using WinProcessInfo = GenericProcessInfo;
+	using WinProcessInfo = GenProcessInfo;
 
 #if defined INCLUDE_NLOHMANN_JSON_HPP_
 	/// @brief Serializer for nlohmann::json library
 	/// @param dest The destination target
 	/// @param gpi Our source object
-	static void to_json(nlohmann::json& dest, const GenericProcessInfo& gpi)
+	static void to_json(nlohmann::json& dest, const GenProcessInfo& gpi)
 	{
 		dest = nlohmann::json {{"processId", gpi.processId},
 		                       {"hostname", gpi.nameHostname},
@@ -390,13 +390,13 @@ namespace siddiqsoft
 } // namespace siddiqsoft
 
 
-/// @brief Specialization of std::formatter for GenericProcessInfo objects.
+/// @brief Specialization of std::formatter for GenProcessInfo objects.
 template <class charT>
-struct std::formatter<siddiqsoft::GenericProcessInfo, charT> : std::formatter<std::string, charT>
+struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::string, charT>
 {
-	/// @brief Format a GenericProcessInfo object using the standard format interface.
+	/// @brief Format a GenProcessInfo object using the standard format interface.
 	template <class FC>
-	auto format(const siddiqsoft::GenericProcessInfo& gpi, FC& ctx) const
+	auto format(const siddiqsoft::GenProcessInfo& gpi, FC& ctx) const
 	{
 #if defined INCLUDE_NLOHMANN_JSON_HPP_
 		return std::formatter<std::string, charT>::format(nlohmann::json(gpi).dump(), ctx);
