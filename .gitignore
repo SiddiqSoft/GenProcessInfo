@@ -364,3 +364,4 @@ FodyWeavers.xsd
 **/.DS_Store
 **/build
 tests/results/**
+**/*.cmake

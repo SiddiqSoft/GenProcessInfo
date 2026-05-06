@@ -1,8 +1,8 @@
 /*
-    GenProcessInfo : tests
+    GenericProcessInfo : tests
     Process Information Tests
 
-    Repo: https://github.com/SiddiqSoft/GenProcessInfo
+    Repo: https://github.com/SiddiqSoft/GenericProcessInfo
 
     BSD 3-Clause License
 
@@ -381,7 +381,7 @@ TEST(formatting, StdFormat)
 {
 	try
 	{
-		siddiqsoft::GenProcessInfo procInfo;
+		siddiqsoft::GenericProcessInfo procInfo;
 		procInfo.snapshot();
 
 		std::string formatted = std::format("{}", procInfo);
@@ -403,7 +403,7 @@ TEST(formatting, StreamOutput)
 {
 	try
 	{
-		siddiqsoft::GenProcessInfo procInfo;
+		siddiqsoft::GenericProcessInfo procInfo;
 		procInfo.snapshot();
 
 		std::ostringstream oss;
@@ -432,32 +432,32 @@ TEST(semantics, NoCopyConstruction)
 {
 	// This test verifies that copy construction is deleted
 	// If this compiles, the test fails
-	static_assert(!std::is_copy_constructible_v<siddiqsoft::GenProcessInfo>,
-	              "GenProcessInfo should not be copy constructible");
+	static_assert(!std::is_copy_constructible_v<siddiqsoft::GenericProcessInfo>,
+	              "GenericProcessInfo should not be copy constructible");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoCopyAssignment)
 {
 	// This test verifies that copy assignment is deleted
-	static_assert(!std::is_copy_assignable_v<siddiqsoft::GenProcessInfo>,
-	              "GenProcessInfo should not be copy assignable");
+	static_assert(!std::is_copy_assignable_v<siddiqsoft::GenericProcessInfo>,
+	              "GenericProcessInfo should not be copy assignable");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoMoveConstruction)
 {
 	// This test verifies that move construction is deleted
-	static_assert(!std::is_move_constructible_v<siddiqsoft::GenProcessInfo>,
-	              "GenProcessInfo should not be move constructible");
+	static_assert(!std::is_move_constructible_v<siddiqsoft::GenericProcessInfo>,
+	              "GenericProcessInfo should not be move constructible");
 	EXPECT_TRUE(true);
 }
 
 TEST(semantics, NoMoveAssignment)
 {
 	// This test verifies that move assignment is deleted
-	static_assert(!std::is_move_assignable_v<siddiqsoft::GenProcessInfo>,
-	              "GenProcessInfo should not be move assignable");
+	static_assert(!std::is_move_assignable_v<siddiqsoft::GenericProcessInfo>,
+	              "GenericProcessInfo should not be move assignable");
 	EXPECT_TRUE(true);
 }
 
@@ -470,7 +470,7 @@ TEST(examples, Example1)
 {
 	try
 	{
-		siddiqsoft::GenProcessInfo procInfo;
+		siddiqsoft::GenericProcessInfo procInfo;
 
 		procInfo.snapshot();
 		EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), procInfo.processId);
@@ -485,7 +485,7 @@ TEST(examples, Example2)
 {
 	try
 	{
-		siddiqsoft::GenProcessInfo procInfo;
+		siddiqsoft::GenericProcessInfo procInfo;
 
 		// We must perform the snapshot to obtain memory and thread usage
 		procInfo.snapshot();
