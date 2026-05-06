@@ -26,9 +26,23 @@ This library supports the following platforms:
 - **Unix-like systems** (with standard POSIX APIs)
 
 # Requirements
-- We use [`nlohmann::json`](https://github.com/nlohmann/json) only in our tests and the library is aware to provide a conversion operator if library is detected.
-- We use `std::format` if present
-- C++17 or later compiler
+
+## Compiler Requirements
+- **C++23 or later** - The library requires C++23 for full functionality including `std::format` support
+- Tested with:
+  - MSVC (Visual Studio 2022 or later)
+  - GCC 13 or later
+  - Clang 17 or later (with `-fexperimental-library` flag for experimental features)
+
+## Dependencies
+- **Optional**: [`nlohmann::json`](https://github.com/nlohmann/json) - Only required for JSON serialization in tests. The library automatically detects and provides a conversion operator if included.
+- **Optional**: `std::format` - Used for formatting output when available (C++20+)
+
+## Platform Requirements
+- **Windows**: Windows 7 or later
+- **Linux**: Kernel with `/proc` filesystem support
+- **macOS**: 10.5 or later  **LIMITED SUPPORT**
+- **Unix-like systems**: POSIX-compliant systems with standard APIs **NOT TESTED**
 
 # Usage
 
@@ -73,11 +87,35 @@ target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
 
 ```
 GenericProcessInfo (also available as WinProcessInfo for backward compatibility)
-- uptime()
-- snapshot()
+- uptime()                    // Returns elapsed time since process startup
+- snapshot()                  // Captures memory, handle, and thread information (expensive operation)
+- getCurrentProcessId()       // Static method to get current process ID (cross-platform)
 - serializer for nlohmann::json
 - serializer for std::format
 ```
+
+## Cross-Platform Implementation
+
+The library provides consistent behavior across all supported platforms:
+
+### Windows
+- Uses Windows API (`GetProcessMemoryInfo`, `CreateToolhelp32Snapshot`, etc.)
+- Retrieves handle count via `GetProcessHandleCount`
+- Thread count obtained from process snapshot
+
+### Linux
+- Reads from `/proc/self/status` for memory and thread information
+- File descriptor count from `/proc/self/status`
+- CPU core count via `sysconf(_SC_NPROCESSORS_ONLN)`
+
+### macOS
+- Uses `getrusage()` for memory information
+- File descriptor enumeration via `/dev/fd`
+- Hostname information via standard POSIX APIs
+
+### Unix-like Systems
+- Generic fallback using `getrusage()` and POSIX APIs
+- Hostname resolution via `gethostname()` and `uname()`
 
 ## Example
 
