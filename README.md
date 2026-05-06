@@ -1,4 +1,4 @@
-WinProcessInfo : Sample Windows process information
+ProcessInfo : Cross-Platform Process Information
 -------------------------------------------
 
 [![CodeQL](https://github.com/SiddiqSoft/WinProcessInfo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/SiddiqSoft/WinProcessInfo/actions/workflows/codeql-analysis.yml)
@@ -17,19 +17,62 @@ Provide for a simple "stats" for a daemon/service without the heft of the full p
 - Serializer for std::format (if supported by your compiler)
 
 
+# Platform Support
+
+This library supports the following platforms:
+- **Windows** (Windows 7 and later)
+- **Linux** (with /proc filesystem support)
+- **macOS** (10.5 and later)
+- **Unix-like systems** (with standard POSIX APIs)
+
 # Requirements
 - We use [`nlohmann::json`](https://github.com/nlohmann/json) only in our tests and the library is aware to provide a conversion operator if library is detected.
 - We use `std::format` if present
--
+- C++17 or later compiler
+
 # Usage
 
-- Use the nuget [SiddiqSoft.WinProcessInfo](https://www.nuget.org/packages/SiddiqSoft.WinProcessInfo/)
-- Copy paste..whatever works.
+## CMake with CPM (Recommended)
+
+Add the following to your `CMakeLists.txt`:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(genericprocinfo
+    GIT_REPOSITORY https://github.com/SiddiqSoft/WinProcessInfo.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(genericprocinfo)
+
+# Link to your target
+target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
+```
+
+Or using CPM directly:
+
+```cmake
+include(CPM)
+CPMAddPackage(
+    NAME genericprocinfo
+    GITHUB_REPOSITORY SiddiqSoft/WinProcessInfo
+    GIT_TAG main
+)
+
+target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
+```
+
+## NuGet (Windows/.NET)
+
+- Use the nuget package [SiddiqSoft.WinProcessInfo](https://www.nuget.org/packages/SiddiqSoft.WinProcessInfo/)
+
+## Manual Integration
+
+- Copy the `include/siddiqsoft/GenericProcessInfo.hpp` header file to your project
 
 ## Interface
 
 ```
-WinProcessInfo
+GenericProcessInfo (also available as WinProcessInfo for backward compatibility)
 - uptime()
 - snapshot()
 - serializer for nlohmann::json
@@ -42,12 +85,12 @@ WinProcessInfo
 #include "gtest/gtest.h"
 #include <format>
 #include "nlohmann/json.hpp"
-#include "siddiqsoft/WinProcessInfo.hpp"
+#include "siddiqsoft/GenericProcessInfo.hpp"
 
 TEST(examples, Example2)
 {
    try {
-      siddiqsoft::WinProcessInfo procInfo;
+      siddiqsoft::GenericProcessInfo procInfo;
 
       // We must perform the snapshot to obtain memory and thread usage
       procInfo.snapshot();
@@ -56,7 +99,7 @@ TEST(examples, Example2)
       nlohmann::json info(procInfo);
 
       std::cerr << info.dump() << std::endl;
-      EXPECT_EQ(GetCurrentProcessId(), info.value("processId", 0));
+      EXPECT_EQ(siddiqsoft::GenericProcessInfo::getCurrentProcessId(), info.value("processId", 0));
    }
    catch (std::exception& e) {
       EXPECT_TRUE(false) << e.what(); // if we throw then the test fails.

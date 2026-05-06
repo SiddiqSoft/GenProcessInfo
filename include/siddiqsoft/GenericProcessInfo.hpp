@@ -1,5 +1,5 @@
 /*
-    WinProcessInfo : Windows Process Information
+    ProcessInfo : Cross-Platform Process Information
     Version 2
 
     https://github.com/SiddiqSoft/WinProcessInfo
