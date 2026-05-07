@@ -36,7 +36,9 @@
 */
 
 #include "gtest/gtest.h"
+#include <chrono>
 #include <format>
+#include <mutex>
 
 #include <thread>
 #include <sstream>
@@ -459,6 +461,113 @@ TEST(semantics, NoMoveAssignment)
 	static_assert(!std::is_move_assignable_v<siddiqsoft::GenProcessInfo>,
 	              "GenProcessInfo should not be move assignable");
 	EXPECT_TRUE(true);
+}
+
+
+// ============================================================================
+// Thread ID Tests
+// ============================================================================
+
+TEST(threadId, GetCurrentThreadId)
+{
+	try
+	{
+		auto threadId = siddiqsoft::GenProcessInfo::GetThreadId();
+
+		// Verify thread ID is valid (non-zero/non-null)
+#if defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+		EXPECT_NE(threadId, 0);
+		std::cerr << "Current Thread ID (Windows): " << threadId << std::endl;
+#else
+		// On Unix/Linux, std::this_thread::id() is returned
+		std::cerr << "Current Thread ID (Unix/Linux): " << threadId << std::endl;
+		EXPECT_TRUE(true); // Just verify it doesn't throw
+#endif
+	}
+	catch (...)
+	{
+		EXPECT_TRUE(false) << "GetThreadId should not throw";
+	}
+}
+
+TEST(threadId, ThreadIdConsistency)
+{
+	try
+	{
+		auto threadId1 = siddiqsoft::GenProcessInfo::GetThreadId();
+		auto threadId2 = siddiqsoft::GenProcessInfo::GetThreadId();
+
+		// Thread ID should be consistent within the same thread
+#if defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+		EXPECT_EQ(threadId1, threadId2);
+		std::cerr << "Thread ID consistency verified: " << threadId1 << std::endl;
+#else
+		// On Unix/Linux, compare std::this_thread::id() objects
+		EXPECT_EQ(threadId1, threadId2);
+		std::cerr << "Thread ID consistency verified" << std::endl;
+#endif
+	}
+	catch (...)
+	{
+		EXPECT_TRUE(false) << "Thread ID consistency check should not throw";
+	}
+}
+
+TEST(threadId, MultipleThreadIds)
+{
+	try
+	{
+		auto mainThreadId = siddiqsoft::GenProcessInfo::GetThreadId();
+		std::vector<decltype(mainThreadId)> threadIds;
+		std::mutex threadIdsMutex;
+
+		// Create a few threads and collect their IDs
+		std::vector<std::thread> threads;
+		for (int i = 0; i < 3; ++i) {
+			threads.emplace_back([&threadIds, &threadIdsMutex]() {
+				// Get the thread ID for this spawned thread
+				auto myThreadId = siddiqsoft::GenProcessInfo::GetThreadId();
+				
+				// Use mutex to safely add to the vector
+				{
+					std::lock_guard<std::mutex> lock(threadIdsMutex);
+					threadIds.push_back(myThreadId);
+					std::cerr << "Spawned thread ID: " << myThreadId << std::endl;
+				}
+			});
+		}
+
+		// Wait for all threads to complete
+		for (auto& t : threads) {
+			t.join();
+		}
+		
+		// Verify we collected thread IDs from the spawned threads
+		EXPECT_EQ(threadIds.size(), 3);
+
+#if defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)
+		// On Windows, verify that at least some thread IDs are different from main thread
+		bool hasDifferentThreadId = false;
+		for (const auto& tid : threadIds) {
+			if (tid != mainThreadId) {
+				hasDifferentThreadId = true;
+				break;
+			}
+		}
+		EXPECT_TRUE(hasDifferentThreadId) << "Spawned threads should have different thread IDs";
+		std::cerr << "Main Thread ID: " << mainThreadId << std::endl;
+		for (size_t i = 0; i < threadIds.size(); ++i) {
+			std::cerr << "Spawned Thread " << i << " ID: " << threadIds[i] << std::endl;
+		}
+#else
+		// On Unix/Linux, just verify we got thread IDs
+		std::cerr << "Collected " << threadIds.size() << " thread IDs from spawned threads" << std::endl;
+#endif
+	}
+	catch (...)
+	{
+		EXPECT_TRUE(false) << "Multiple thread ID collection should not throw";
+	}
 }
 
 

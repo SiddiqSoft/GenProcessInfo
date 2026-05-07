@@ -149,6 +149,17 @@ namespace siddiqsoft
 #endif
 		}
 
+		/// @brief Get the current thread id
+		/// @remark For Windows we use GetCurrentThreadId() otherwise we defer to the C++ thread library.
+		static auto GetThreadId() noexcept
+		{
+#if defined(SIDDIQSOFT_WINDOWS)
+			return GetCurrentThreadId();
+#else
+			return std::this_thread::id();
+#endif
+       }
+
 	private:
 #if defined(SIDDIQSOFT_WINDOWS)
 		/// @brief Windows-specific initialization.
@@ -163,29 +174,48 @@ namespace siddiqsoft
 
 			processHandle = GetCurrentProcess();
 
+			// Use a larger buffer for FQDN names (DNS names can be up to 255 characters)
+			const DWORD MAX_DNS_NAME_LENGTH = 256;
+
 			// Get the hostname
-			DWORD dwSize {MAX_COMPUTERNAME_LENGTH};
-			nameHostname.resize(MAX_COMPUTERNAME_LENGTH);
-			GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsHostname, nameHostname.data(), &dwSize);
-			nameHostname.resize(dwSize);
+			DWORD dwSize = MAX_DNS_NAME_LENGTH;
+			nameHostname.resize(MAX_DNS_NAME_LENGTH);
+			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsHostname, nameHostname.data(), &dwSize)) {
+				nameHostname.resize(dwSize);
+			} else {
+				nameHostname.clear();
+			}
 
 			// Get the hostname(fully qualified)
-			dwSize = MAX_COMPUTERNAME_LENGTH;
-			nameFqdn.resize(MAX_COMPUTERNAME_LENGTH);
-			GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsFullyQualified, nameFqdn.data(), &dwSize);
-			nameFqdn.resize(dwSize);
+			dwSize = MAX_DNS_NAME_LENGTH;
+			nameFqdn.resize(MAX_DNS_NAME_LENGTH);
+			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsFullyQualified, nameFqdn.data(), &dwSize)) {
+				nameFqdn.resize(dwSize);
+			} else {
+				nameFqdn.clear();
+			}
 
 			// Get the local hostname(fully qualified)
-			dwSize = MAX_COMPUTERNAME_LENGTH;
-			nameHostnamePhysical.resize(MAX_COMPUTERNAME_LENGTH);
-			GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNamePhysicalDnsFullyQualified, nameHostnamePhysical.data(), &dwSize);
-			nameHostnamePhysical.resize(dwSize);
+			dwSize = MAX_DNS_NAME_LENGTH;
+			nameHostnamePhysical.resize(MAX_DNS_NAME_LENGTH);
+			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNamePhysicalDnsFullyQualified, nameHostnamePhysical.data(), &dwSize)) {
+				nameHostnamePhysical.resize(dwSize);
+			} else {
+				nameHostnamePhysical.clear();
+			}
 
 			// Get the domain name
-			dwSize = MAX_COMPUTERNAME_LENGTH;
-			nameDomainName.resize(MAX_COMPUTERNAME_LENGTH);
-			GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsDomain, nameDomainName.data(), &dwSize);
-			nameDomainName.resize(dwSize);
+			dwSize = MAX_DNS_NAME_LENGTH;
+			nameDomainName.resize(MAX_DNS_NAME_LENGTH);
+			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsDomain, nameDomainName.data(), &dwSize)) {
+				nameDomainName.resize(dwSize);
+			} else {
+				nameDomainName.clear();
+			}
+
+			if (nameFqdn.length() < 2 && !nameHostname.empty() && !nameDomainName.empty()) {
+				nameFqdn= nameHostname + "." + nameDomainName;
+            }
 		}
 
 		/// @brief Collects the memory information for this process on Windows.
