@@ -213,10 +213,10 @@ void snapshot() noexcept
   std::cout << "Elapsed: " << ms.count() << " ms\n";
   ```
 
-#### getCurrentProcessId()
+#### GetProcessId()
 
 ```cpp
-static auto getCurrentProcessId() noexcept
+static auto GetProcessId() noexcept
 ```
 
 - **Description**: Get the current process ID in a cross-platform manner
@@ -227,7 +227,7 @@ static auto getCurrentProcessId() noexcept
 - **Static**: Yes - can be called without creating an instance
 - **Example**:
   ```cpp
-  auto pid = siddiqsoft::GenProcessInfo::GetCurrentProcessId();
+  auto pid = siddiqsoft::GenProcessInfo::GetProcessId();
   std::cout << "Process ID: " << pid << "\n";
   ```
 
