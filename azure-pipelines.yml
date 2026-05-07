@@ -60,6 +60,11 @@ stages:
         useConfigFile: true
         configFilePath: 'GitVersion.yml'
 
+      # Update the build number in Azure Pipelines in release build for main/master branch
+    - script: echo "##vso[build.updatebuildnumber]$(GITVERSION_MAJORMINORPATCH)"
+      displayName: 'Update Build Number'
+      condition: and(succeeded(), eq(variables['BuildType'], 'Release'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+
     - task: CMake@1
       displayName: 'CMake Configure $(cmake.preset)'
       inputs:
@@ -185,6 +190,11 @@ stages:
       inputs:
         useConfigFile: true
         configFilePath: 'GitVersion.yml'
+
+      # Update the build number in Azure Pipelines in release build for main/master branch
+    - script: echo "##vso[build.updatebuildnumber]$(GITVERSION_MAJORMINORPATCH)"
+      displayName: 'Update Build Number'
+      condition: and(succeeded(), eq(variables['BuildType'], 'Release'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
 
     - task: CMake@1
       displayName: 'CMake Configure $(cmake.preset)'
