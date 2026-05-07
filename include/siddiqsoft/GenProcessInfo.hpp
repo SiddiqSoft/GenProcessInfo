@@ -40,7 +40,6 @@
 #include <chrono>
 #include <cstdint>
 #include <format>
-#include <pthread.h>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -58,6 +57,7 @@
 #include <sys/utsname.h>
 #include <dirent.h>
 #include <cstring>
+#include <pthread.h>
 #define SIDDIQSOFT_UNIX 1
 #endif
 
