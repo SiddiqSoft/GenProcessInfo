@@ -227,7 +227,7 @@ static auto getCurrentProcessId() noexcept
 - **Static**: Yes - can be called without creating an instance
 - **Example**:
   ```cpp
-  auto pid = siddiqsoft::GenProcessInfo::getCurrentProcessId();
+  auto pid = siddiqsoft::GenProcessInfo::GetCurrentProcessId();
   std::cout << "Process ID: " << pid << "\n";
   ```
 

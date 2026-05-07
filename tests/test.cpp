@@ -55,7 +55,7 @@ TEST(initialization, DefaultConstructor)
 		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify that basic properties are initialized
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), procInfo.processId);
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetCurrentProcessId(), procInfo.processId);
 		EXPECT_GT(procInfo.cpuCores, 0);
 		EXPECT_FALSE(procInfo.nameHostname.empty());
 		EXPECT_FALSE(procInfo.nameFqdn.empty());
@@ -116,7 +116,7 @@ TEST(initialization, ProcessIDProperty)
 		siddiqsoft::GenProcessInfo procInfo;
 
 		// Verify process ID matches current process
-		EXPECT_EQ(procInfo.processId, siddiqsoft::GenProcessInfo::getCurrentProcessId());
+		EXPECT_EQ(procInfo.processId, siddiqsoft::GenProcessInfo::GetCurrentProcessId());
 		EXPECT_GT(procInfo.processId, 0);
 
 		std::cerr << "Process ID: " << procInfo.processId << std::endl;
@@ -333,7 +333,7 @@ TEST(json, JSONFieldValues)
 		nlohmann::json info(procInfo);
 
 		// Verify field values
-		EXPECT_EQ(info.value("processId", 0), siddiqsoft::GenProcessInfo::getCurrentProcessId());
+		EXPECT_EQ(info.value("processId", 0), siddiqsoft::GenProcessInfo::GetCurrentProcessId());
 		EXPECT_EQ(info.value("hostname", ""), procInfo.nameHostname);
 		EXPECT_EQ(info.value("fqdn", ""), procInfo.nameFqdn);
 		EXPECT_EQ(info.value("cpuCores", 0), procInfo.cpuCores);
@@ -473,7 +473,7 @@ TEST(examples, Example1)
 		siddiqsoft::GenProcessInfo procInfo;
 
 		procInfo.snapshot();
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), procInfo.processId);
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetCurrentProcessId(), procInfo.processId);
 	}
 	catch (...)
 	{
@@ -494,7 +494,7 @@ TEST(examples, Example2)
 		nlohmann::json info(procInfo);
 
 		std::cerr << info.dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), info.value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetCurrentProcessId(), info.value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)
@@ -513,7 +513,7 @@ TEST(examples, Example3)
 		procInfo.snapshot();
 
 		std::cerr << nlohmann::json(procInfo).dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::getCurrentProcessId(), nlohmann::json(procInfo).value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetCurrentProcessId(), nlohmann::json(procInfo).value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)

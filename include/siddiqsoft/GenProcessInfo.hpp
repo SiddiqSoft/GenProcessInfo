@@ -138,7 +138,9 @@ namespace siddiqsoft
 		}
 
 		/// @brief Get the current process ID in a cross-platform manner
-		static auto getCurrentProcessId() noexcept
+		/// @remark This is a static call while the instance will have access to the
+		///         member processId.
+		static auto GetCurrentProcessId() noexcept
 		{
 #if defined(SIDDIQSOFT_WINDOWS)
 			return GetCurrentProcessId();

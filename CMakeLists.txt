@@ -17,7 +17,7 @@ project(GenProcessInfo
         VERSION         "${CURRENT_PROJECT_VERSION}"
         LANGUAGES       CXX
         HOMEPAGE_URL    "%%myurl%%"
-        DESCRIPTION     "Calculate time taken for given context")
+        DESCRIPTION     "Provides for some basic process information")
 
 # Set C++ standard globally
 set(CMAKE_CXX_STANDARD 23)
