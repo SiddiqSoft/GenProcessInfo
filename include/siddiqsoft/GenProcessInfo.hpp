@@ -156,7 +156,7 @@ namespace siddiqsoft
 #if defined(SIDDIQSOFT_WINDOWS)
 			return GetCurrentThreadId();
 #else
-			return std::this_thread::id();
+			return std::this_thread::get_id();
 #endif
        }
 
