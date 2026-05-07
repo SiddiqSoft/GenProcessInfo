@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.29)
 include(pack/CMakeCommonHelpers.cmake)
 
 # Project metadata
-project(genericprocinfo
+project(GenProcessInfo
         VERSION         "${CURRENT_PROJECT_VERSION}"
         LANGUAGES       CXX
         HOMEPAGE_URL    "%%myurl%%"

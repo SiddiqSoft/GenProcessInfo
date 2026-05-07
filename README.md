@@ -27,13 +27,8 @@ A header-only C++23 library providing cross-platform process information with mi
 <summary><b>CMake with CPM (Recommended)</b></summary>
 
 ```cmake
-include(CPM)
-CPMAddPackage(
-    NAME genericprocinfo
-    GITHUB_REPOSITORY SiddiqSoft/WinProcessInfo
-    GIT_TAG main
-)
-target_link_libraries(your_target PRIVATE genericprocinfo::genericprocinfo)
+CPMAddPackage("gh:SiddiqSoft/GenProcessInfo#main") // replace main with specific version
+target_link_libraries(${PROJECT_NAME} INTERFACE GenProcessInfo::GenProcessInfo)
 ```
 </details>
 

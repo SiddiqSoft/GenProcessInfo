@@ -15,7 +15,7 @@
             },
             "cacheVariables": {
                 "CPM_SOURCE_CACHE": "${sourceParentDir}/.cpmcache",
-                "genericprocinfo_BUILD_TESTS": "ON"
+                "GenProcessInfo_BUILD_TESTS": "ON"
             }
         },
         {
