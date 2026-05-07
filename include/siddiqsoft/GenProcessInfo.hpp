@@ -38,7 +38,9 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <format>
+#include <pthread.h>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -151,14 +153,23 @@ namespace siddiqsoft
 
 		/// @brief Get the current thread id
 		/// @remark For Windows we use GetCurrentThreadId() otherwise we defer to the C++ thread library.
-		static auto GetThreadId() noexcept
-		{
 #if defined(SIDDIQSOFT_WINDOWS)
-			return GetCurrentThreadId();
+		static uint64_t GetThreadId() noexcept { return GetCurrentThreadId(); }
 #else
-			return std::this_thread::get_id();
+		static uint64_t GetThreadId() noexcept
+		{
+			thread_local uint64_t thisThreadId = 0;
+
+			// This is potentially expensive and likely invoked at high frequency.
+			if (thisThreadId == 0) {
+				std::stringstream ss;
+				ss << std::this_thread::get_id();
+				thisThreadId = std::stoull(ss.str(), nullptr, 16);
+			}
+
+			return thisThreadId;
+		}
 #endif
-       }
 
 	private:
 #if defined(SIDDIQSOFT_WINDOWS)
@@ -182,7 +193,8 @@ namespace siddiqsoft
 			nameHostname.resize(MAX_DNS_NAME_LENGTH);
 			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsHostname, nameHostname.data(), &dwSize)) {
 				nameHostname.resize(dwSize);
-			} else {
+			}
+			else {
 				nameHostname.clear();
 			}
 
@@ -191,16 +203,20 @@ namespace siddiqsoft
 			nameFqdn.resize(MAX_DNS_NAME_LENGTH);
 			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsFullyQualified, nameFqdn.data(), &dwSize)) {
 				nameFqdn.resize(dwSize);
-			} else {
+			}
+			else {
 				nameFqdn.clear();
 			}
 
 			// Get the local hostname(fully qualified)
 			dwSize = MAX_DNS_NAME_LENGTH;
 			nameHostnamePhysical.resize(MAX_DNS_NAME_LENGTH);
-			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNamePhysicalDnsFullyQualified, nameHostnamePhysical.data(), &dwSize)) {
+			if (GetComputerNameExA(
+			            COMPUTER_NAME_FORMAT::ComputerNamePhysicalDnsFullyQualified, nameHostnamePhysical.data(), &dwSize))
+			{
 				nameHostnamePhysical.resize(dwSize);
-			} else {
+			}
+			else {
 				nameHostnamePhysical.clear();
 			}
 
@@ -209,13 +225,14 @@ namespace siddiqsoft
 			nameDomainName.resize(MAX_DNS_NAME_LENGTH);
 			if (GetComputerNameExA(COMPUTER_NAME_FORMAT::ComputerNameDnsDomain, nameDomainName.data(), &dwSize)) {
 				nameDomainName.resize(dwSize);
-			} else {
+			}
+			else {
 				nameDomainName.clear();
 			}
 
 			if (nameFqdn.length() < 2 && !nameHostname.empty() && !nameDomainName.empty()) {
-				nameFqdn= nameHostname + "." + nameDomainName;
-            }
+				nameFqdn = nameHostname + "." + nameDomainName;
+			}
 		}
 
 		/// @brief Collects the memory information for this process on Windows.
