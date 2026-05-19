@@ -26,6 +26,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Build options
 option(${PROJECT_NAME}_BUILD_TESTS "Build tests for ${PROJECT_NAME}" OFF)
+option(CI_BUILDID "Build ID for CI builds" "0.0.0")
 
 # Library definition
 add_library(${PROJECT_NAME} INTERFACE)
