@@ -10,8 +10,9 @@
 # 3. Publishes to NuGet and GitHub (on main/master branches)
 #
 # Pipeline Stages:
-# 1. Build - Unified build stage with matrix for all OS/Architecture/Compiler combinations
-# 2. Publication - Publishes to NuGet and GitHub
+# 1. Windows - Cleanup, build, and test for Windows with matrix for architecture and compiler
+# 2. Linux - Cleanup, build, and test for Linux with matrix for architecture and compiler
+# 3. Publication - Publishes to NuGet and GitHub
 #
 # Documentation: See PIPELINE_DOCUMENTATION_INDEX.md for detailed information
 # ============================================================================
@@ -50,33 +51,19 @@ resources:
 # PARAMETERS
 # ============================================================================
 parameters:
-  - name: BuildOS
-    type: object
-    default: ['Windows', 'Linux', 'Darwin']
-    displayName: "Build operating system"
-
-  # Architecture Selection
-  - name: BuildArchitectures
-    type: object
-    default: [ 'arm64', 'x64' ]
-    displayName: "Build architectures"
-
-  # Compiler Selection
+  # Compiler Selection per Platform
   - name: CompilerSelection_Windows
     type: object
-    default: [ 'MSVC' ]
-    displayName: "Compilers for Windows"
+    default:
+      - MSVC
+    displayName: "Windows compilers to build (MSVC)"
 
   - name: CompilerSelection_Linux
     type: object
-    default: [ 'Clang', 'GCC' ]
-    displayName: "Compilers for Linux"
-
-  - name: CompilerSelection_Darwin
-    type: object
-    default: [ 'Clang' ]
-    displayName: "Compilers for Darwin"
-    
+    default:
+      - Clang
+      - GCC
+    displayName: "Linux compilers to build (Clang, GCC)"
 
   # Testing
   - name: RunTests
@@ -126,58 +113,114 @@ variables:
 # STAGES
 # ============================================================================
 stages:
-- stage: Cleanup
-  displayName: Cleanup
-  dependsOn: []
-  condition: eq(${{ parameters.Cleanup }}, true)
-  jobs:
-  - template: .ci/az-cleanup-${{ parameters.BuildOperatingSystem }}.yml
-    parameters:
-      displayName: "${{ parameters.BuildOperatingSystem }} Cleanup"
-      BuildOperatingSystem: "${{ parameters.BuildOperatingSystem }}"
-      CleanupDirectory: "$(cpmCachePath)"
-
   # ==========================================================================
-  # STAGE 1: BUILD (Unified matrix for all platforms)
+  # STAGE 1: WINDOWS BUILD
   # ==========================================================================
-- ${{ each os in parameters.BuildOS }}
-- stage: Build_${{ os }}
-  displayName: Build for ${{ os }}
-  dependsOn: []
-  condition: ne(${{ parameters.Cleanup }}, true)
-  jobs:
-    - job: BuildMatrix
-      displayName: Build Matrix
-      strategy:
-        matrix:
-          ${{ each arch in parameters.BuildArchitectures }}
-             ${{ each compiler in parameters.CompilerSelection[os] }}
-                ${{ os }}_${{ arch }}_${{ compiler }}:
-                    OS: ${{ os }}
-                    Architecture: ${{ arch }}
-                    Compiler: ${{ compiler }}
+  - stage: Windows
+    displayName: Windows
+    dependsOn: []
+    condition: ne(${{ parameters.Cleanup }}, true)
+    jobs:
+      - template: .ci/az-cleanup-windows.yml
+        displayName: Windows Cleanup
+        parameters:
+            cleanup: ${{ parameters.Cleanup }}
+    
+      - job: WindowsBuildMatrix
+        displayName: Windows Build and Test
+        strategy:
+          matrix:
+            # Windows x64 Release
+            ${{ each compiler in parameters.CompilerSelection_Windows }}:
+              Windows_x64_${{ compiler }}_Release:
+                architecture: x64
+                compiler: ${{ compiler }}
+                buildType: Release
+                cmakePreset: Windows-x64-Release
+              # Windows arm64 Release
+              Windows_arm64_${{ compiler }}_Release:
+                architecture: arm64
+                compiler: ${{ compiler }}
+                buildType: Release
+                cmakePreset: Windows-arm64-Release
         steps:
-        - script: echo "Building on ${{ matrix.OS }} for ${{ matrix.Architecture }} with ${{ matrix.Compiler }}"
-            displayName: "Build ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
+          # Cleanup step
+          - script: |
+              echo "Cleaning up build artifacts..."
+              if exist "$(buildOutputPath)" rmdir /s /q "$(buildOutputPath)"
+              if exist "$(cpmCachePath)" rmdir /s /q "$(cpmCachePath)"
+            displayName: "Cleanup Build Artifacts"
+            condition: eq('${{ parameters.Cleanup }}', 'true')
+
+          # Build step
+          - template: .ci/az-build-windows.yml
+            parameters:
+              displayName: "Windows $(architecture) $(compiler) $(buildType)"
+              architecture: $(architecture)
+              compiler: $(compiler)
+              buildType: $(buildType)
+              cmakePreset: $(cmakePreset)
+              runTests: false
+              publishNuGet: ${{ variables.PublishNuGet }}
+              cleanup: ${{ parameters.Cleanup }}
 
   # ==========================================================================
-  # STAGE 2: PUBLICATION
+  # STAGE 2: LINUX BUILD
   # ==========================================================================
-- stage: Publication
-  displayName: Publication
-  dependsOn:
-    - Build_Windows
-    - Build_Linux
-  condition: and(ne(${{ parameters.Cleanup }}, true), succeeded())
-  jobs:
-    # NuGet Release
-    - template: .ci/az-publish-nuget.yml
-      parameters:
-        displayName: NuGet Release
-        PublishNuGet: ${{ variables.PublishNuGet }}
+  - stage: Linux
+    displayName: Linux
+    dependsOn: []
+    condition: ne(${{ parameters.Cleanup }}, true)
+    jobs:
+      - job: LinuxBuildMatrix
+        displayName: Linux Build and Test
+        strategy:
+          matrix:
+            # Linux x64 with selected compilers
+            ${{ each compiler in parameters.CompilerSelection_Linux }}:
+              Linux_x64_${{ compiler }}_Release:
+                architecture: x64
+                compiler: ${{ compiler }}
+                buildType: Release
+                cmakePreset: Linux-${{ compiler }}-Release
+        steps:
+          # Cleanup step
+          - script: |
+              echo "Cleaning up build artifacts..."
+              rm -rf "$(buildOutputPath)"
+              rm -rf "$(cpmCachePath)"
+            displayName: "Cleanup Build Artifacts"
+            condition: eq('${{ parameters.Cleanup }}', 'true')
 
-    # GitHub Release
-    - template: .ci/az-publish-github.yml
-      parameters:
-        displayName: GitHub Release
-        PublishGitHub: ${{ variables.PublishGitHub }}
+          # Build and test step
+          - template: .ci/az-build-linux.yml
+            parameters:
+              displayName: "Linux $(architecture) $(compiler) $(buildType)"
+              architecture: $(architecture)
+              compiler: $(compiler)
+              buildType: $(buildType)
+              cmakePreset: $(cmakePreset)
+              runTests: ${{ parameters.RunTests }}
+              cleanup: ${{ parameters.Cleanup }}
+
+  # ==========================================================================
+  # STAGE 3: PUBLICATION
+  # ==========================================================================
+  - stage: Publication
+    displayName: Publication
+    dependsOn:
+      - Windows
+      - Linux
+    condition: and(ne(${{ parameters.Cleanup }}, true), succeeded())
+    jobs:
+      # NuGet Release
+      - template: .ci/az-publish-nuget.yml
+        parameters:
+          displayName: NuGet Release
+          PublishNuGet: ${{ variables.PublishNuGet }}
+
+      # GitHub Release
+      - template: .ci/az-publish-github.yml
+        parameters:
+          displayName: GitHub Release
+          PublishGitHub: ${{ variables.PublishGitHub }}

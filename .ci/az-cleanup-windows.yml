@@ -1,0 +1,56 @@
+# ============================================================================
+# Azure Pipelines Linux Build Template
+# ============================================================================
+# 
+# Perform cleanup tasks for Linux agents, such as clearing caches or temporary files.
+#
+# ============================================================================
+
+# ============================================================================
+# PARAMETERS
+# ============================================================================
+parameters:
+  - name: displayName
+    type: string
+
+  - name: BuildOperatingSystem
+    type: string
+
+  - name: CleanupDirectory
+    type: string
+    
+# ============================================================================
+# JOBS
+# ============================================================================
+jobs:
+  - job: Cleanup
+    displayName: ${{ parameters.displayName }}
+    
+    workspace:
+      clean: all
+    
+    pool:
+      name: Default
+      demands:
+        - Agent.OS -equals ${{ parameters.BuildOperatingSystem }}
+    
+    steps:
+      # ====================================================================
+      # CHECKOUT & CLEANUP
+      # ====================================================================
+      - checkout: self
+        name: step1
+
+      - task: PowerShell@2
+        displayName: Cleanup CPM Cache
+        inputs:
+          targetType: inline
+          script: |
+            Write-Host "Cleaning up CPM cache...${{ parameters.CleanupDirectory }}"
+            if (Test-Path -Path ${{ parameters.CleanupDirectory }}) {
+              Remove-Item -Recurse -Force -LiteralPath ${{ parameters.CleanupDirectory }}
+              Write-Host "Cleanup successful"
+            } else {
+              Write-Host "No cleanup needed: path does not exist"
+            }
+        condition: eq(${{ parameters.Cleanup }}, true)

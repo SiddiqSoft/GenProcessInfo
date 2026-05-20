@@ -68,19 +68,6 @@ jobs:
     
     steps:
       # ====================================================================
-      # CHECKOUT & CLEANUP
-      # ====================================================================
-      - checkout: self
-        name: step1
-
-      - bash: |
-          echo "Cleaning CPM cache directory..."
-          rm -rdf "$(cpmCachePath)"
-          echo "Cleanup successful"
-        displayName: Cleanup CPM Cache
-        condition: eq(${{ parameters.Cleanup }}, true)
-
-      # ====================================================================
       # START COSMOS DB EMULATOR (Docker)
       # We startup early to allow the container to spin up to speed
       # while we're building the project.
