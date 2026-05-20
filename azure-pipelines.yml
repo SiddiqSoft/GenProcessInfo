@@ -51,20 +51,47 @@ resources:
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: Architectures
+    type: object
+    default:
+      - x64
+      - arm64
+    displayName: "Architectures to build (x64, arm64)"
+  
+  - name: Platforms
+    type: object
+    default:
+      - Windows
+      - Linux
+    displayName: "Platforms to build (Windows, Linux)"
+  
   # Compiler Selection per Platform
-  - name: CompilerSelection_Windows
+  - name: Compilers_Windows
     type: object
     default:
       - MSVC
     displayName: "Windows compilers to build (MSVC)"
 
-  - name: CompilerSelection_Linux
+  - name: Compilers_Linux
     type: object
     default:
       - Clang
       - GCC
     displayName: "Linux compilers to build (Clang, GCC)"
 
+  - name: Compilers_Darwin
+    type: object
+    default:
+      - Clang
+    displayName: "Darwin compilers to build (Clang, GCC)"
+
+  - name: BuildTypes
+    type: object
+    default:
+      - Release
+      - Debug
+    displayName: "Build types to build (Release, Debug)"
+  
   # Testing
   - name: RunTests
     type: boolean
@@ -119,81 +146,27 @@ stages:
   - stage: Windows
     displayName: Windows
     dependsOn: []
-    condition: ne(${{ parameters.Cleanup }}, true)
     jobs:
       - template: .ci/az-cleanup-windows.yml
         parameters:
-          cleanup: ${{ parameters.Cleanup }}
-    
+          architecture: ${{ matrix.architecture }}
+
       - job: WindowsBuildMatrix
         displayName: Windows Build and Test
         strategy:
           matrix:
             # Windows x64 Release
-            ${{ each compiler in parameters.CompilerSelection_Windows }}:
-              Windows_x64_${{ compiler }}_Release:
-                architecture: x64
-                compiler: ${{ compiler }}
-                buildType: Release
-                cmakePreset: Windows-x64-Release
-              # Windows arm64 Release
-              Windows_arm64_${{ compiler }}_Release:
-                architecture: arm64
-                compiler: ${{ compiler }}
-                buildType: Release
-                cmakePreset: Windows-arm64-Release
-        
-        steps:
-          # Build step
-          - template: .ci/az-build-windows.yml
-            parameters:
-              displayName: "Windows $(architecture) $(compiler) $(buildType)"
-              architecture: $(architecture)
-              compiler: $(compiler)
-              buildType: $(buildType)
-              cmakePreset: $(cmakePreset)
-              runTests: false
-              publishNuGet: ${{ variables.PublishNuGet }}
-              cleanup: ${{ parameters.Cleanup }}
-
-  # ==========================================================================
-  # STAGE 2: LINUX BUILD
-  # ==========================================================================
-  - stage: Linux
-    displayName: Linux
-    dependsOn: []
-    condition: ne(${{ parameters.Cleanup }}, true)
-    jobs:
-      - job: LinuxBuildMatrix
-        displayName: Linux Build and Test
-        strategy:
-          matrix:
-            # Linux x64 with selected compilers
-            ${{ each compiler in parameters.CompilerSelection_Linux }}:
-              Linux_x64_${{ compiler }}_Release:
-                architecture: x64
-                compiler: ${{ compiler }}
-                buildType: Release
-                cmakePreset: Linux-${{ compiler }}-Release
-        steps:
-          # Cleanup step
-          - script: |
-              echo "Cleaning up build artifacts..."
-              rm -rf "$(buildOutputPath)"
-              rm -rf "$(cpmCachePath)"
-            displayName: "Cleanup Build Artifacts"
-            condition: eq('${{ parameters.Cleanup }}', 'true')
-
-          # Build and test step
-          - template: .ci/az-build-linux.yml
-            parameters:
-              displayName: "Linux $(architecture) $(compiler) $(buildType)"
-              architecture: $(architecture)
-              compiler: $(compiler)
-              buildType: $(buildType)
-              cmakePreset: $(cmakePreset)
-              runTests: ${{ parameters.RunTests }}
-              cleanup: ${{ parameters.Cleanup }}
+            ${{ each arch in parameters.Architectures }}:
+              Windows_${{ arch }}:
+              - template: .ci/az-build-windows.yml
+                parameters:
+                  displayName: "Windows $(architecture) $(compiler) $(buildType)"
+                  architecture: ${{ arch }}
+                  compilers: $${{ parameters.Compilers_Windows }}
+                  buildTypes: ${{ BuildType }}
+                  runTests: ${{ parameters.RunTests }}
+                  publishNuGet: ${{ variables.PublishNuGet }}
+                  publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
   # STAGE 3: PUBLICATION
