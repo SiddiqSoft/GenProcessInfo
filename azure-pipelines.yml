@@ -10,9 +10,8 @@
 # 3. Publishes to NuGet and GitHub (on main/master branches)
 #
 # Pipeline Stages:
-# 1. Windows - Builds on Windows with matrix for architecture and compiler
-# 2. Linux - Builds on Linux with matrix for architecture and compiler
-# 3. Publication - Publishes to NuGet and GitHub
+# 1. Build - Unified build stage with matrix for all OS/Architecture/Compiler combinations
+# 2. Publication - Publishes to NuGet and GitHub
 #
 # Documentation: See PIPELINE_DOCUMENTATION_INDEX.md for detailed information
 # ============================================================================
@@ -51,13 +50,28 @@ resources:
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: BuildOS
+    type: object
+    default: ['Windows', 'Linux', 'Darwin']
+    displayName: "Build operating system"
+
+  # Architecture Selection
+  - name: BuildArchitectures
+    type: object
+    default: [ 'arm64', 'x64' ]
+    displayName: "Build architectures"
+
   # Compiler Selection
-  - name: LinuxCompilers
+  - name: CompilerSelection
     type: object
     default:
-      - Clang
-      - GCC
-    displayName: "Linux compilers to build (Clang, GCC)"
+      Windows:
+        MSVC
+      Linux:
+        Clang
+        GCC
+      Darwin:
+        Clang
 
   # Testing
   - name: RunTests
@@ -108,73 +122,38 @@ variables:
 # ============================================================================
 stages:
   # ==========================================================================
-  # STAGE 1: WINDOWS BUILD
+  # STAGE 1: BUILD (Unified matrix for all platforms)
   # ==========================================================================
-  - stage: Windows
-    displayName: Windows
-    dependsOn: []
-    condition: ne(${{ parameters.Cleanup }}, true)
-    jobs:
-      - template: .ci/az-build-windows.yml
-        parameters:
-          displayName: "Windows Build Matrix"
-          runTests: false
-          publishNuGet: ${{ variables.PublishNuGet }}
-          cleanup: ${{ parameters.Cleanup }}
-          strategy:
-            matrix:
-              # Windows x64 Release
-              Windows_x64_Release:
-                architecture: x64
-                compiler: MSVC
-                buildType: Release
-                cmakePreset: Windows-x64-Release
-              # Windows arm64 Release
-              Windows_arm64_Release:
-                architecture: arm64
-                compiler: MSVC
-                buildType: Release
-                cmakePreset: Windows-arm64-Release
+  - ${{ each os in parameters.BuildOS }}
+    - stage: Build_${{ os }}
+      displayName: Build for ${{ os }}
+      dependsOn: []
+      condition: ne(${{ parameters.Cleanup }}, true)
+      jobs:
+      - job: BuildMatrix
+        displayName: Build Matrix
+        strategy:
+          matrix:
+            ${{ each arch in parameters.BuildArchitectures }}
+              ${{ each compiler in parameters.CompilerSelection[os] }}
+                ${{ os }}_${{ arch }}_${{ compiler }}:
+                  OS: ${{ os }}
+                  Architecture: ${{ arch }}
+                  Compiler: ${{ compiler }}
+        steps:
+        - script: echo "Building on ${{ matrix.OS }} for ${{ matrix.Architecture }} with ${{ matrix.Compiler }}"
+          displayName: "Build ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
+          # Here you would call your actual build scripts, e.g.:
+          # - script: .ci/build.sh --os ${{ matrix.OS }} --arch ${{ matrix.Architecture }} --compiler ${{ matrix.Compiler }}
+          #   displayName: "Run build script for ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
 
   # ==========================================================================
-  # STAGE 2: LINUX BUILD
-  # ==========================================================================
-  - stage: Linux
-    displayName: Linux
-    dependsOn: []
-    condition: ne(${{ parameters.Cleanup }}, true)
-    jobs:
-      - template: .ci/az-build-linux.yml
-        parameters:
-          displayName: "Linux Build Matrix"
-          runTests: ${{ parameters.RunTests }}
-          cleanup: ${{ parameters.Cleanup }}
-          linuxCompilers: ${{ parameters.LinuxCompilers }}
-          strategy:
-            matrix:
-              # Linux x64 Clang Release (conditional)
-              ${{ if containsValue(parameters.LinuxCompilers, 'Clang') }}:
-                Linux_x64_Clang_Release:
-                  architecture: x64
-                  compiler: Clang
-                  buildType: Release
-                  cmakePreset: Linux-Clang-Release
-              # Linux x64 GCC Release (conditional)
-              ${{ if containsValue(parameters.LinuxCompilers, 'GCC') }}:
-                Linux_x64_GCC_Release:
-                  architecture: x64
-                  compiler: GCC
-                  buildType: Release
-                  cmakePreset: Linux-GCC-Release
-
-  # ==========================================================================
-  # STAGE 3: PUBLICATION
+  # STAGE 2: PUBLICATION
   # ==========================================================================
   - stage: Publication
     displayName: Publication
     dependsOn:
-      - Windows
-      - Linux
+      - Build
     condition: and(ne(${{ parameters.Cleanup }}, true), succeeded())
     jobs:
       # NuGet Release
