@@ -136,11 +136,11 @@ stages:
   # STAGE 1: BUILD (Unified matrix for all platforms)
   # ==========================================================================
 - ${{ each os in parameters.BuildOS }}
-  - stage: Build_${{ os }}
-    displayName: Build for ${{ os }}
-    dependsOn: []
-    condition: ne(${{ parameters.Cleanup }}, true)
-    jobs:
+- stage: Build_${{ os }}
+  displayName: Build for ${{ os }}
+  dependsOn: []
+  condition: ne(${{ parameters.Cleanup }}, true)
+  jobs:
     - job: BuildMatrix
       displayName: Build Matrix
       strategy:
