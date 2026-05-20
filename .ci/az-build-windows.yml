@@ -17,6 +17,9 @@
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: displayName
+    type: string
+    
   - name: architectures
     type: object
 
