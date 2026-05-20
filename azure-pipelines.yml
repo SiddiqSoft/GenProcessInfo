@@ -121,31 +121,42 @@ variables:
 # STAGES
 # ============================================================================
 stages:
+- stage: Cleanup
+    displayName: Cleanup
+    dependsOn: []
+    condition: eq(${{ parameters.Cleanup }}, true)
+    jobs:
+    - template: .ci/az-cleanup-${{ parameters.BuildOperatingSystem }}.yml
+      parameters:
+      displayName: "${{ parameters.BuildOperatingSystem }} Cleanup"
+      BuildOperatingSystem: "${{ parameters.BuildOperatingSystem }}"
+      CleanupDirectory: "$(cpmCachePath)"
+
   # ==========================================================================
   # STAGE 1: BUILD (Unified matrix for all platforms)
   # ==========================================================================
-  - ${{ each os in parameters.BuildOS }}
+- ${{ each os in parameters.BuildOS }}
     - stage: Build_${{ os }}
-      displayName: Build for ${{ os }}
-      dependsOn: []
-      condition: ne(${{ parameters.Cleanup }}, true)
-      jobs:
-      - job: BuildMatrix
+        displayName: Build for ${{ os }}
+        dependsOn: []
+        condition: ne(${{ parameters.Cleanup }}, true)
+        jobs:
+        - job: BuildMatrix
         displayName: Build Matrix
         strategy:
-          matrix:
+            matrix:
             ${{ each arch in parameters.BuildArchitectures }}
-              ${{ each compiler in parameters.CompilerSelection[os] }}
+                ${{ each compiler in parameters.CompilerSelection[os] }}
                 ${{ os }}_${{ arch }}_${{ compiler }}:
-                  OS: ${{ os }}
-                  Architecture: ${{ arch }}
-                  Compiler: ${{ compiler }}
+                    OS: ${{ os }}
+                    Architecture: ${{ arch }}
+                    Compiler: ${{ compiler }}
         steps:
         - script: echo "Building on ${{ matrix.OS }} for ${{ matrix.Architecture }} with ${{ matrix.Compiler }}"
-          displayName: "Build ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
-          # Here you would call your actual build scripts, e.g.:
-          # - script: .ci/build.sh --os ${{ matrix.OS }} --arch ${{ matrix.Architecture }} --compiler ${{ matrix.Compiler }}
-          #   displayName: "Run build script for ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
+            displayName: "Build ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
+            # Here you would call your actual build scripts, e.g.:
+            # - script: .ci/build.sh --os ${{ matrix.OS }} --arch ${{ matrix.Architecture }} --compiler ${{ matrix.Compiler }}
+            #   displayName: "Run build script for ${{ matrix.OS }} - ${{ matrix.Architecture }} - ${{ matrix.Compiler }}"
 
   # ==========================================================================
   # STAGE 2: PUBLICATION
