@@ -54,4 +54,4 @@ jobs:
             } else {
               Write-Host "No cleanup needed: path does not exist"
             }
-        condition: eq(${{ parameters.Cleanup }}, true)
+
