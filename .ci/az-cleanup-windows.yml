@@ -46,13 +46,12 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            ${{ each dirp in parameters.CleanupDirectories }} {
-              Write-Host "Cleaning up ...$dirp"
-              if (Test-Path -Path $dirp) {
-                Remove-Item -Recurse -Force -LiteralPath $dirp
-                Write-Host "Cleanup of $dirp successful"
-              } else {
-                Write-Host "No cleanup needed: path does not exist"
-              }
+            $dirp= "$(CleanupDirectories[0])"
+            Write-Host "Cleaning up ...$dirp"
+            if (Test-Path -Path $dirp) {
+              Remove-Item -Recurse -Force -LiteralPath $dirp
+              Write-Host "Cleanup of $dirp successful"
+            } else {
+              Write-Host "No cleanup needed: path does not exist"
             }
         condition: eq(${{ parameters.Cleanup }}, true)
