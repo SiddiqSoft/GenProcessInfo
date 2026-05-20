@@ -17,27 +17,24 @@
 # PARAMETERS
 # ============================================================================
 parameters:
-  - name: displayName
-    type: string
-  - name: architecture
-    type: string
+  - name: architectures
+    type: object
+
+  - name: compilers
+    type: object
+
+  - name: buildTypes
+    type: object
+
   - name: runTests
     type: boolean
-    default: true
-  - name: matrixConfigs
-    type: object
+
   - name: publishNuGet
     type: boolean
-    default: false
-  - name: BuildX64
+
+  - name: publishGitHub
     type: boolean
-    default: false
-  - name: BuildDebug
-    type: boolean
-    default: false
-  - name: Cleanup
-    type: boolean
-    default: false
+
 
 # ============================================================================
 # JOBS
@@ -85,8 +82,8 @@ jobs:
 
       - template: .ci/az-pretest-windows.yml
         parameters:
-          runTests: ${{ parameters.runTests }}
           architecture: ${{ matrix.architecture }}
+          runTests: ${{ parameters.runTests }}
       
       # ====================================================================
       # Version Detection

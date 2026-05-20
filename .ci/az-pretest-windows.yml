@@ -9,15 +9,15 @@
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: architecture
+    type: string
+
   - name: runTests
     type: boolean
-    default: true
     
 steps:
   # ====================================================================
-  # START COSMOS DB EMULATOR (Docker)
-  # We startup early to allow the container to spin up to speed
-  # while we're building the project.
+  # Emulator Setup (for tests)
   # ====================================================================
   - task: BatchScript@1
     displayName: Start Azure CosmosDB Emulator

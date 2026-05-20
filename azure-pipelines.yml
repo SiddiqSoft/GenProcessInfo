@@ -153,22 +153,15 @@ stages:
           BuildOperatingSystem: $(Agent.OS)
           CleanupDirectories: [ $(cpmCachePath) ]
 
-      - job: WindowsBuildMatrix
-        displayName: Windows Build and Test
-        strategy:
-          matrix:
-            # Windows x64 Release
-            ${{ each arch in parameters.Architectures }}:
-              Windows_${{ arch }}:
-              - template: .ci/az-build-windows.yml
-                parameters:
-                  displayName: "Windows $(architecture) $(compiler) $(buildType)"
-                  architecture: ${{ arch }}
-                  compilers: $${{ parameters.Compilers_Windows }}
-                  buildTypes: ${{ BuildType }}
-                  runTests: ${{ parameters.RunTests }}
-                  publishNuGet: ${{ variables.PublishNuGet }}
-                  publishGitHub: ${{ variables.PublishGitHub }}
+      - template: .ci/az-build-windows.yml
+        parameters:
+          displayName: "Windows Build and Test"
+          architectures: ${{ parameters.Architectures }}
+          compilers: $${{ parameters.Compilers_Windows }}
+          buildTypes: ${{ BuildTypes }}
+          runTests: ${{ parameters.RunTests }}
+          publishNuGet: ${{ variables.PublishNuGet }}
+          publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
   # STAGE 3: PUBLICATION
