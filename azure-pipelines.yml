@@ -122,7 +122,6 @@ stages:
     condition: ne(${{ parameters.Cleanup }}, true)
     jobs:
       - template: .ci/az-cleanup-windows.yml
-        displayName: Windows Cleanup
         parameters:
             cleanup: ${{ parameters.Cleanup }}
     
@@ -143,15 +142,8 @@ stages:
                 compiler: ${{ compiler }}
                 buildType: Release
                 cmakePreset: Windows-arm64-Release
+        
         steps:
-          # Cleanup step
-          - script: |
-              echo "Cleaning up build artifacts..."
-              if exist "$(buildOutputPath)" rmdir /s /q "$(buildOutputPath)"
-              if exist "$(cpmCachePath)" rmdir /s /q "$(cpmCachePath)"
-            displayName: "Cleanup Build Artifacts"
-            condition: eq('${{ parameters.Cleanup }}', 'true')
-
           # Build step
           - template: .ci/az-build-windows.yml
             parameters:
