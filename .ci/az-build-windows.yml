@@ -67,29 +67,6 @@ jobs:
       - checkout: self
         name: step1
 
-      - task: PowerShell@2
-        displayName: Cleanup CPM Cache
-        inputs:
-          targetType: inline
-          script: |
-            Write-Host "Cleaning up CPM cache..."
-            if (Test-Path -Path $(cpmCachePath)) {
-              Remove-Item -Recurse -Force -LiteralPath $(cpmCachePath)
-              Write-Host "Cleanup successful"
-            } else {
-              Write-Host "No cleanup needed: path does not exist"
-            }
-        condition: eq(${{ parameters.Cleanup }}, true)
-
-      # ====================================================================
-      # Emulator Setup (for tests)
-      # ====================================================================
-      - task: BatchScript@1
-        displayName: Start Azure CosmosDB Emulator
-        inputs:
-          filename: $(System.DefaultWorkingDirectory)/tests/setup-linux-emulator.bat
-        condition: and(succeeded(), eq(${{ parameters.runTests }}, true), ne('${{parameters.architecture}}', 'arm64')) # docker on arm64 not available yet    
-
       # ====================================================================
       # Environment Setup
       # ====================================================================
@@ -105,6 +82,11 @@ jobs:
           filename: $(VCVARS_PATH)
           arguments: $(AGENT_OSARCHITECTURE)
           modifyEnvironment: true
+
+      - template: .ci/az-pretest-windows.yml
+        parameters:
+          runTests: ${{ parameters.runTests }}
+          architecture: ${{ matrix.architecture }}
       
       # ====================================================================
       # Version Detection
@@ -189,12 +171,11 @@ jobs:
         continueOnError: true
         condition: and(succeeded(), eq(${{ parameters.runTests }}, true))
 
-      - task: CmdLine@2
-        displayName: Stop Azure CosmosDB Emulator
-        inputs:
-          script: docker stop $(dockerContainerName)
-        condition: ne('${{parameters.architecture}}', 'arm64') # docker on arm64 not available yet
-
+      - template: .ci/az-posttest-windows.yml
+        parameters:
+          runTests: ${{ parameters.runTests }}
+          architecture: ${{ matrix.architecture }}
+      
       - task: PublishTestResults@2
         displayName: Publish Test Results
         inputs:

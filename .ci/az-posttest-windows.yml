@@ -1,0 +1,21 @@
+# ============================================================================
+# Azure Pipelines Linux Build Template
+# ============================================================================
+# This file should contain project-specific pre-test steps for Linux builds.
+# It is included in the main Linux build pipeline before running tests.
+# ============================================================================
+
+# ============================================================================
+# PARAMETERS
+# ============================================================================
+parameters:
+  - name: runTests
+    type: boolean
+    default: true
+    
+steps:
+  - task: CmdLine@2
+    displayName: Stop Azure CosmosDB Emulator
+    inputs:
+      script: docker stop $(dockerContainerName)
+    condition: ne('${{parameters.architecture}}', 'arm64') # docker on arm64 not available yet
