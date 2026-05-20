@@ -150,7 +150,8 @@ stages:
       - template: .ci/az-cleanup-windows.yml
         parameters:
           displayName: "Windows Cleanup"
-          CleanupDirectories: $(cpmCachePath)
+          BuildOperatingSystem: $(Agent.OS)
+          CleanupDirectories: [ $(cpmCachePath) ]
 
       - job: WindowsBuildMatrix
         displayName: Windows Build and Test

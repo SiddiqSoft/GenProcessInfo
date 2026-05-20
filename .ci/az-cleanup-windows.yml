@@ -16,8 +16,8 @@ parameters:
   - name: BuildOperatingSystem
     type: string
 
-  - name: CleanupDirectory
-    type: string
+  - name: CleanupDirectories
+    type: object
     
 # ============================================================================
 # JOBS
@@ -46,11 +46,13 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            Write-Host "Cleaning up CPM cache...${{ parameters.CleanupDirectory }}"
-            if (Test-Path -Path ${{ parameters.CleanupDirectory }}) {
-              Remove-Item -Recurse -Force -LiteralPath ${{ parameters.CleanupDirectory }}
-              Write-Host "Cleanup successful"
-            } else {
-              Write-Host "No cleanup needed: path does not exist"
+            ${{ each dirp in parameters.CleanupDirectories }} {
+              Write-Host "Cleaning up ...$dirp"
+              if (Test-Path -Path $dirp) {
+                Remove-Item -Recurse -Force -LiteralPath $dirp
+                Write-Host "Cleanup of $dirp successful"
+              } else {
+                Write-Host "No cleanup needed: path does not exist"
+              }
             }
         condition: eq(${{ parameters.Cleanup }}, true)
