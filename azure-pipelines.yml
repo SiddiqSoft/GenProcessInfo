@@ -149,7 +149,8 @@ stages:
     jobs:
       - template: .ci/az-cleanup-windows.yml
         parameters:
-          architecture: ${{ matrix.architecture }}
+          displayName: "Windows Cleanup"
+          CleanupDirectories: $(cpmCachePath)
 
       - job: WindowsBuildMatrix
         displayName: Windows Build and Test
