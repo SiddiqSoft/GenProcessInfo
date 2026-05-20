@@ -122,12 +122,12 @@ variables:
 # ============================================================================
 stages:
 - stage: Cleanup
-    displayName: Cleanup
-    dependsOn: []
-    condition: eq(${{ parameters.Cleanup }}, true)
-    jobs:
-    - template: .ci/az-cleanup-${{ parameters.BuildOperatingSystem }}.yml
-      parameters:
+  displayName: Cleanup
+  dependsOn: []
+  condition: eq(${{ parameters.Cleanup }}, true)
+  jobs:
+  - template: .ci/az-cleanup-${{ parameters.BuildOperatingSystem }}.yml
+    parameters:
       displayName: "${{ parameters.BuildOperatingSystem }} Cleanup"
       BuildOperatingSystem: "${{ parameters.BuildOperatingSystem }}"
       CleanupDirectory: "$(cpmCachePath)"
@@ -136,17 +136,17 @@ stages:
   # STAGE 1: BUILD (Unified matrix for all platforms)
   # ==========================================================================
 - ${{ each os in parameters.BuildOS }}
-    - stage: Build_${{ os }}
-        displayName: Build for ${{ os }}
-        dependsOn: []
-        condition: ne(${{ parameters.Cleanup }}, true)
-        jobs:
-        - job: BuildMatrix
-        displayName: Build Matrix
-        strategy:
-            matrix:
-            ${{ each arch in parameters.BuildArchitectures }}
-                ${{ each compiler in parameters.CompilerSelection[os] }}
+  - stage: Build_${{ os }}
+    displayName: Build for ${{ os }}
+    dependsOn: []
+    condition: ne(${{ parameters.Cleanup }}, true)
+    jobs:
+    - job: BuildMatrix
+      displayName: Build Matrix
+      strategy:
+        matrix:
+          ${{ each arch in parameters.BuildArchitectures }}
+             ${{ each compiler in parameters.CompilerSelection[os] }}
                 ${{ os }}_${{ arch }}_${{ compiler }}:
                     OS: ${{ os }}
                     Architecture: ${{ arch }}
