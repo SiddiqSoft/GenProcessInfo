@@ -141,7 +141,7 @@ stages:
   # ==========================================================================
   - stage: Windows
     displayName: Windows
-    condition: contains( ${{ parameters.Platforms }}, 'Windows')
+    condition: contains( parameters.Platforms, 'Windows')
     dependsOn: []
     jobs:
     - ${{ if eq(parameters.Cleanup, true) }}:
