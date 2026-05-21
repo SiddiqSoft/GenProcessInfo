@@ -143,6 +143,7 @@ stages:
     displayName: Windows
     condition: ${{ containsValue(parameters.Platforms, 'Windows') }}
     dependsOn: []
+
     jobs:
     - ${{ if eq(parameters.Cleanup, true) }}:
       - template: .ci/az-cleanup-windows.yml
