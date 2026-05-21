@@ -87,7 +87,7 @@ jobs:
         
               demands:
                 - Agent.OS -equals Linux
-                - Agent.OSArchitecture -equals ${{ arch }}
+                #- Agent.OSArchitecture -equals ${{ arch }}
                 # add additional demands here
             
             variables:

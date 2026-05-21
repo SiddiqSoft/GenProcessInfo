@@ -78,7 +78,7 @@ jobs:
               name: Default
               demands:
                 - Agent.OS -equals Windows_NT
-                - Agent.OSArchitecture -equals ${{ arch }}
+                #- Agent.OSArchitecture -equals ${{ arch }}
                 # add additional demands here
 
             variables:
