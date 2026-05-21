@@ -23,14 +23,17 @@ parameters:
   - name: architectures
     type: stringList
     default: [ x64, arm64 ]
+    values: [ x64, arm64 ]
 
   - name: compilers
     type: stringList
     default: [ MSVC ]
+    values: [ MSVC ]
 
   - name: buildTypes
     type: stringList
     default: [ Release, Debug ]
+    values: [ Release, Debug ]
 
   - name: runTests
     type: boolean
