@@ -147,7 +147,7 @@ stages:
         parameters:
           displayName: "Windows Cleanup"
           BuildOperatingSystem: $(Agent.OS)
-          ${{ if eq(parameters.Cleanup, true) }}::
+          ${{ if eq(parameters.Cleanup, true) }}:
             CleanupDirectory: ${{ variables.cpmCachePath }}
           ${{ else }}:
             CleanupDirectory: ''
