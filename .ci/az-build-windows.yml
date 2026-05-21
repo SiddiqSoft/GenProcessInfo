@@ -55,7 +55,7 @@ jobs:
           - job: JobWindowsBuild_${{ arch }}
             displayName: "Build Windows ${{ arch }} with ${{ compiler }} (${{ buildType }})"
             
-            condition: eq('${{ arch }}', $Agent.OSArchitecture)
+            condition: eq('${{ arch }}', $(Agent.OSArchitecture))
             
             workspace:
               clean: all
