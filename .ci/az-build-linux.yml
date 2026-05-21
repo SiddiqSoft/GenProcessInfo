@@ -103,7 +103,7 @@ jobs:
               - checkout: self
                 name: step1
 
-              - template: .ci/az-pretest-linux.yml
+              - template: az-pretest-linux.yml
                 parameters:
                   thisArchitecture: ${{ arch }}
                   runTests: ${{ parameters.runTests }}
@@ -189,7 +189,7 @@ jobs:
                 continueOnError: true
                 condition: and(succeeded(), eq(${{ parameters.runTests }}, true))
 
-              - template: .ci/az-posttest-linux.yml
+              - template: az-posttest-linux.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
                   architecture: ${{ matrix.architecture }}
