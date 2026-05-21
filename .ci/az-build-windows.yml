@@ -52,7 +52,7 @@ jobs:
   - ${{ each arch in parameters.architectures }}:
     - ${{ each compiler in parameters.compilers }}:
         - ${{ each buildType in parameters.buildTypes }}:
-          - job: JobWindowsBuild_${{ arch }}
+          - job: Job_Windows_${{ arch }}_${{ compiler }}_${{ buildType }}
             displayName: "Build Windows ${{ arch }} with ${{ compiler }} (${{ buildType }})"
             
             condition: eq('${{ arch }}', variables['Agent.OSArchitecture'])
