@@ -33,7 +33,7 @@ jobs:
           targetType: inline
           script: |
             Write-Host "Clearing directory on build machine: $(Agent.OS) $(Agent.OSArchitecture)"
-            $dirp = "${{ parameter.CleanupDirectory }}"
+            $dirp = "${{ parameters.CleanupDirectory }}"
             Write-Host "Cleaning up ...$dirp"
             if (Test-Path -Path $dirp) {
               Remove-Item -Recurse -Force -LiteralPath $dirp
