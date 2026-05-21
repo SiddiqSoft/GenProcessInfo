@@ -143,24 +143,22 @@ stages:
     displayName: Windows
     dependsOn: []
     jobs:
+    - ${{ if eq(parameters.Cleanup, true) }}:
       - template: .ci/az-cleanup-windows.yml
         parameters:
           displayName: "Windows Cleanup"
           BuildOperatingSystem: $(Agent.OS)
-          ${{ if eq(parameters.Cleanup, true) }}:
-            CleanupDirectory: ${{ variables.cpmCachePath }}
-          ${{ else }}:
-            CleanupDirectory: ''
+          CleanupDirectory: ${{ variables.cpmCachePath }}
 
-      - template: .ci/az-build-windows.yml
-        parameters:
-          displayName: "Windows Build and Test"
-          architectures: ${{ parameters.Architectures }}
-          compilers: ${{ parameters.Compilers_Windows }}
-          buildTypes: ${{ parameters.BuildTypes }}
-          runTests: ${{ parameters.RunTests }}
-          publishNuGet: ${{ variables.PublishNuGet }}
-          publishGitHub: ${{ variables.PublishGitHub }}
+    - template: .ci/az-build-windows.yml
+      parameters:
+        displayName: "Windows Build and Test"
+        architectures: ${{ parameters.Architectures }}
+        compilers: ${{ parameters.Compilers_Windows }}
+        buildTypes: ${{ parameters.BuildTypes }}
+        runTests: ${{ parameters.RunTests }}
+        publishNuGet: ${{ variables.PublishNuGet }}
+        publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
   # STAGE 3: PUBLICATION
