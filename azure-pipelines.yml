@@ -178,7 +178,7 @@ stages:
           BuildOperatingSystem: $(Agent.OS)
           CleanupDirectory: ${{ variables.cpmCachePath }}
 
-    - template: .ci/az-build-windows.yml
+    - template: .ci/az-build-linux.yml
       parameters:
         displayName: "Linux Build and Test"
         architectures: ${{ parameters.Architectures }}
