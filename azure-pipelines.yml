@@ -129,8 +129,8 @@ variables:
 
   # Build paths
   cpmCachePath: $(Agent.HomeDirectory)/.cpmcache
-  buildOutputPath: $(System.DefaultWorkingDirectory)/build/$(cmake.preset)
-  testResultsPath: $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests/results
+  buildOutputPat_h: $(System.DefaultWorkingDirectory)/build/$(cmakePreset)
+  testResultsPat_h: $(System.DefaultWorkingDirectory)/build/$(cmakePreset)/tests/results
 
 # ============================================================================
 # STAGES

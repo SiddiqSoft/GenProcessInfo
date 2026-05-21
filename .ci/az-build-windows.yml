@@ -43,17 +43,13 @@ parameters:
     type: boolean
     default: false
 
-  - name: publishGitHub
-    type: boolean
-    default: false
-
 
 # ============================================================================
 # JOBS
 # ============================================================================
 jobs:
   - job:
-    displayName: "Debug Stuff"
+    displayName: "Windows Job Debug Stuff"
     steps:
     - ${{ each arch in parameters.architectures }}:
       - ${{ each compiler in parameters.compilers }}:
@@ -83,6 +79,7 @@ jobs:
               demands:
                 - Agent.OS -equals Windows_NT
                 - Agent.OSArchitecture -equals ${{ arch }}
+                # add additional demands here
 
             variables:
               cmakePreset: Windows-${{ arch }}-${{ buildType }}
@@ -141,6 +138,23 @@ jobs:
                   echo buildType: ${{ buildType }}
                   echo cmakePreset: ${{ variables.cmakePreset }}
                 displayName: debug display variables
+              
+              # ====================================================================
+              # Build Number
+              # ====================================================================
+              - task: PowerShell@2
+                displayName: Set Build Number (Release)
+                inputs:
+                  targetType: inline
+                  script: Write-Host "##vso[build.updateBuildNumber]$(GITVERSION_MAJORMINORPATCH)"
+                condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+
+              - task: PowerShell@2
+                displayName: Set Build Number (Pre-release)
+                inputs:
+                  targetType: inline
+                  script: Write-Host "##vso[build.updateBuildNumber]$(GITVERSION_SEMVER)"
+                condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
 
               # ====================================================================
               # Build
@@ -191,23 +205,6 @@ jobs:
                   buildConfiguration: $(BuildType)
                 continueOnError: true
                 condition: and(succeeded(), eq(${{ parameters.runTests }}, true), or(eq(variables['BuildType'], 'Release'), failed()))
-              
-              # ====================================================================
-              # Build Number
-              # ====================================================================
-              - task: PowerShell@2
-                displayName: Set Build Number (Release)
-                inputs:
-                  targetType: inline
-                  script: Write-Host "##vso[build.updateBuildNumber]$(GITVERSION_MAJORMINORPATCH)"
-                condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
-
-              - task: PowerShell@2
-                displayName: Set Build Number (Pre-release)
-                inputs:
-                  targetType: inline
-                  script: Write-Host "##vso[build.updateBuildNumber]$(GITVERSION_SEMVER)"
-                condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
               
               # ====================================================================
               # NuGet Packaging
