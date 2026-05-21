@@ -160,7 +160,6 @@ stages:
         buildTypes: ${{ parameters.BuildTypes }}
         runTests: ${{ parameters.RunTests }}
         publishNuGet: ${{ variables.PublishNuGet }}
-        publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
   # STAGE 1: LINUX BUILD
@@ -185,7 +184,6 @@ stages:
         compilers: ${{ parameters.Compilers_Linux }}
         buildTypes: ${{ parameters.BuildTypes }}
         runTests: ${{ parameters.RunTests }}
-        publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
   # STAGE 3: PUBLICATION
