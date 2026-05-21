@@ -60,7 +60,7 @@ jobs:
                 - startsWith( $(Agent.OS), 'Windows' )
                 - Agent.OSArchitecture -equals ${{ architecture }}
             variables:
-              cmakePreset: Windows${{ compiler }}-${{ buildType }}-${{ architecture }}
+              cmakePreset: Windows-${{ compiler }}-${{ buildType }}-${{ architecture }}
               buildType: ${{ buildType }}
 
             steps:
@@ -86,7 +86,7 @@ jobs:
                   arguments: $(AGENT_OSARCHITECTURE)
                   modifyEnvironment: true
 
-              - template: .ci/az-pretest-windows.yml
+              - template: $(System.DefaultWorkingDirectory)/.ci/az-pretest-windows.yml
                 parameters:
                   architecture: ${{ architecture }}
                   runTests: ${{ parameters.runTests }}
@@ -151,7 +151,7 @@ jobs:
                 continueOnError: true
                 condition: and(succeeded(), eq(${{ parameters.runTests }}, true))
 
-              - template: .ci/az-posttest-windows.yml
+              - template: $(System.DefaultWorkingDirectory)/.ci/az-posttest-windows.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
                   architecture: ${{ matrix.architecture }}
