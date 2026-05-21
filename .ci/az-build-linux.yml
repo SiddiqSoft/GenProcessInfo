@@ -76,8 +76,8 @@ jobs:
   - ${{ each arch in parameters.architectures }}:
     - ${{ each compiler in parameters.compilers }}:
         - ${{ each buildType in parameters.buildTypes }}:
-          - job: Job_Windows_${{ arch }}_${{ compiler }}_${{ buildType }}
-            displayName: "Build Windows ${{ arch }} with ${{ compiler }} (${{ buildType }})"
+          - job: Job_Linux_${{ arch }}_${{ compiler }}_${{ buildType }}
+            displayName: "Build Linux ${{ arch }} with ${{ compiler }} (${{ buildType }})"
     
             workspace:
               clean: all
