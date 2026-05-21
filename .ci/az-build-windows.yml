@@ -49,13 +49,13 @@ parameters:
 # JOBS
 # ============================================================================
 jobs:
-  - ${{ each architecture in parameters.architectures }}:
+  - ${{ each arch in parameters.architectures }}:
     - ${{ each compiler in parameters.compilers }}:
         - ${{ each buildType in parameters.buildTypes }}:
-          - job: JobWindowsBuild_${{ architecture }}
-            displayName: "Build Windows ${{ architecture }} with ${{ compiler }} (${{ buildType }})"
+          - job: JobWindowsBuild_${{ arch }}
+            displayName: "Build Windows ${{ arch }} with ${{ compiler }} (${{ buildType }})"
             
-            condition: eq('${{ architecture }}', $(Agent.OSArchitecture))
+            condition: eq('${{ arch }}', $(Agent.OSArchitecture))
             
             workspace:
               clean: all
@@ -64,9 +64,9 @@ jobs:
               name: Default
               demands:
                 - startsWith( $(Agent.OS), 'Windows' )
-                - Agent.OSArchitecture -equals ${{ architecture }}
+                - Agent.OSArchitecture -equals ${{ arch }}
             variables:
-              cmakePreset: Windows-${{ compiler }}-${{ buildType }}-${{ architecture }}
+              cmakePreset: Windows-${{ arch }}-${{ buildType }}
               buildType: ${{ buildType }}
 
             steps:
@@ -94,7 +94,7 @@ jobs:
 
               - template: az-pretest-windows.yml
                 parameters:
-                  architecture: ${{ architecture }}
+                  architecture: ${{ arch }}
                   runTests: ${{ parameters.runTests }}
               
               # ====================================================================
@@ -117,7 +117,7 @@ jobs:
               - script: |
                   echo Agent.OS: $(Agent.OS)
                   echo Agent.OSArchitecture: $(Agent.OSArchitecture)
-                  echo architecture: ${{ architecture }}
+                  echo architecture: ${{ arch }}
                   echo compiler: ${{ compiler }}
                   echo buildType: ${{ buildType }}
                   echo cmakePreset: ${{ variables.cmakePreset }}
