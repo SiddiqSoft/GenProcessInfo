@@ -163,6 +163,32 @@ stages:
         publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================
+  # STAGE 1: LINUX BUILD
+  # ==========================================================================
+  - stage: Linux
+    displayName: Linux
+    condition: ${{ containsValue(parameters.Platforms, 'Linux') }}
+    dependsOn: []
+
+    jobs:
+    - ${{ if eq(parameters.Cleanup, true) }}:
+      - template: .ci/az-cleanup-linux.yml
+        parameters:
+          displayName: "Linux Cleanup"
+          BuildOperatingSystem: $(Agent.OS)
+          CleanupDirectory: ${{ variables.cpmCachePath }}
+
+    - template: .ci/az-build-windows.yml
+      parameters:
+        displayName: "Linux Build and Test"
+        architectures: ${{ parameters.Architectures }}
+        compilers: ${{ parameters.Compilers_Linux }}
+        buildTypes: ${{ parameters.BuildTypes }}
+        runTests: ${{ parameters.RunTests }}
+        publishNuGet: ${{ variables.PublishNuGet }}
+        publishGitHub: ${{ variables.PublishGitHub }}
+
+  # ==========================================================================
   # STAGE 3: PUBLICATION
   # ==========================================================================
   #- stage: Publication
