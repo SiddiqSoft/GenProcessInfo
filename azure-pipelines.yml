@@ -154,7 +154,7 @@ stages:
           displayName: "Windows Build and Test"
           architectures: ${{ parameters.Architectures }}
           compilers: ${{ parameters.Compilers_Windows }}
-          buildTypes: ${{ paramters.BuildTypes}}
+          buildTypes: ${{ parameters.BuildTypes }}
           runTests: ${{ parameters.RunTests }}
           publishNuGet: ${{ variables.PublishNuGet }}
           publishGitHub: ${{ variables.PublishGitHub }}
