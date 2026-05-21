@@ -52,34 +52,40 @@ resources:
 # ============================================================================
 parameters:
   - name: Architectures
-    type: object
-    default: [ x64, arm64 ]
+    type: stringList
+    default: [ arm64 ]
+    values: [ x64, arm64 ]
     displayName: "Architectures to build (x64, arm64)"
   
   - name: Platforms
-    type: object
+    type: stringList
     default: [ Windows, Linux ]
+    values: [ Windows, Linux, Darwin ]
     displayName: "Platforms to build (Windows, Linux)"
   
   # Compiler Selection per Platform
   - name: Compilers_Windows
-    type: object
+    type: stringList
     default: [ MSVC ]
+    values: [ MSVC ]
     displayName: "Windows compilers to build (MSVC)"
 
   - name: Compilers_Linux
-    type: object
+    type: stringList
     default: [ Clang, GCC ]
+    values: [ Clang, GCC ]
     displayName: "Linux compilers to build (Clang, GCC)"
 
   - name: Compilers_Darwin
-    type: object
-    default: [ Clang ]
+    type: stringList
+    default: Clang
+    values: [ Clang ]
     displayName: "Darwin compilers to build (Clang, GCC)"
 
   - name: BuildTypes
-    type: object
-    default: [ Release, Debug ]
+    type: stringList
+    default: Release
+    values: [ Release, Debug ]
     displayName: "Build types to build (Release, Debug)"
   
   # Testing

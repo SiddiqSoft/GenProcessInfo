@@ -21,15 +21,15 @@ parameters:
     type: string
 
   - name: architectures
-    type: object
+    type: stringList
     default: [ x64, arm64 ]
 
   - name: compilers
-    type: object
+    type: stringList
     default: [ MSVC ]
 
   - name: buildTypes
-    type: object
+    type: stringList
     default: [ Release, Debug ]
 
   - name: runTests
@@ -65,6 +65,7 @@ jobs:
               demands:
                 - Agent.OS -equals Windows_NT
                 - Agent.OSArchitecture -equals ${{ arch }}
+
             variables:
               cmakePreset: Windows-${{ arch }}-${{ buildType }}
               buildType: ${{ buildType }}
