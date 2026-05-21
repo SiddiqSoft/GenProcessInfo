@@ -147,13 +147,13 @@ stages:
     displayName: Windows
     dependsOn: []
     jobs:
-      - template: $(System.DefaultWorkingDirectory)/.ci/az-cleanup-windows.yml
+      - template: .ci/az-cleanup-windows.yml
         parameters:
           displayName: "Windows Cleanup"
           BuildOperatingSystem: $(Agent.OS)
           CleanupDirectories: [ $(cpmCachePath) ]
 
-      - template: $(System.DefaultWorkingDirectory)/.ci/az-build-windows.yml
+      - template: .ci/az-build-windows.yml
         parameters:
           displayName: "Windows Build and Test"
           architectures: ${{ parameters.Architectures }}
