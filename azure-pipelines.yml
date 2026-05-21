@@ -169,7 +169,7 @@ stages:
     dependsOn:
       - Windows
       #- Linux
-    condition: and(ne(${{ parameters.Cleanup }}, true), eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true), succeeded())
+    condition: and(eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true), succeeded())
     jobs:
       # NuGet Release
       - template: .ci/az-publish-nuget.yml
