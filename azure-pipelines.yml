@@ -78,13 +78,13 @@ parameters:
 
   - name: Compilers_Darwin
     type: stringList
-    default: Clang
+    default: [ Clang ]
     values: [ Clang ]
     displayName: "Darwin compilers to build (Clang, GCC)"
 
   - name: BuildTypes
     type: stringList
-    default: Release
+    default: [ Release ]
     values: [ Release, Debug ]
     displayName: "Build types to build (Release, Debug)"
   
