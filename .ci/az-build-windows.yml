@@ -160,7 +160,7 @@ jobs:
               - template: az-posttest-windows.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
-                  architecture: ${{ architecture }}
+                  architecture: ${{ arch }}
               
               - task: PublishTestResults@2
                 displayName: Publish Test Results
