@@ -152,9 +152,9 @@ stages:
       - template: .ci/az-build-windows.yml
         parameters:
           displayName: "Windows Build and Test"
-          architectures: [ arm64, x64 ]
-          compilers: [ MSVC ]
-          buildTypes: [ Release ]
+          architectures: ${{ parameters.Architectures }}
+          compilers: ${{ parameters.Compilers_Windows }}
+          buildTypes: ${{ paramters.BuildTypes}}
           runTests: ${{ parameters.RunTests }}
           publishNuGet: ${{ variables.PublishNuGet }}
           publishGitHub: ${{ variables.PublishGitHub }}
