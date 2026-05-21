@@ -105,8 +105,8 @@ jobs:
 
               - template: .ci/az-pretest-linux.yml
                 parameters:
+                  thisArchitecture: ${{ arch }}
                   runTests: ${{ parameters.runTests }}
-                  architecture: ${{ matrix.architecture }}
             
               # ====================================================================
               # VERSION DETECTION
