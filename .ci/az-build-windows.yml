@@ -57,7 +57,7 @@ jobs:
             pool:
               name: Default
               demands:
-                - ${{ startsWith( Agent.OS, 'Windows' ) }}
+                - startsWith( $(Agent.OS), 'Windows' )
                 - Agent.OSArchitecture -equals ${{ architecture }}
             variables:
               cmakePreset: Windows${{ compiler }}-${{ buildType }}-${{ architecture }}
