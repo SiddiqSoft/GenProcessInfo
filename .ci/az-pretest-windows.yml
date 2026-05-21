@@ -9,7 +9,7 @@
 # PARAMETERS
 # ============================================================================
 parameters:
-  - name: architecture
+  - name: thisArchitecture
     type: string
 
   - name: runTests
@@ -23,4 +23,4 @@ steps:
     displayName: Start Azure CosmosDB Emulator
     inputs:
       filename: $(System.DefaultWorkingDirectory)/tests/setup-linux-emulator.bat
-    condition: and(succeeded(), eq(${{ parameters.runTests }}, true), ne('${{parameters.architecture}}', 'arm64')) # docker on arm64 not available yet    
+    condition: and(succeeded(), eq(${{ parameters.runTests }}, true), ne('${{parameters.thisArchitecture}}', 'arm64')) # docker on arm64 not available yet    

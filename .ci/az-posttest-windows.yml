@@ -9,6 +9,9 @@
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: architecture
+    type: string
+    
   - name: runTests
     type: boolean
     default: true
