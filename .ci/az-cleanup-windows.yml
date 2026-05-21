@@ -34,11 +34,11 @@ jobs:
         name: step1
 
       - task: PowerShell@2
-        displayName: Cleanup CPM Cache
+        displayName: Cleanup Directory
         inputs:
           targetType: inline
           script: |
-            $dirp= ${{ parameters.CleanupDirectory }}
+            $dirp= $[ parameters.CleanupDirectory ]
             Write-Host "Cleaning up ...$dirp"
             if (Test-Path -Path $dirp) {
               Remove-Item -Recurse -Force -LiteralPath $dirp
@@ -46,4 +46,6 @@ jobs:
             } else {
               Write-Host "No cleanup needed: path does not exist"
             }
+        continueOnError: true
+
 
