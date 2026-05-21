@@ -188,21 +188,21 @@ stages:
   # ==========================================================================
   # STAGE 3: PUBLICATION
   # ==========================================================================
-  #- stage: Publication
-  #  displayName: Publication
-  #  dependsOn:
-  #    - Windows
-  #    #- Linux
-  #  condition: and(or(eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true)), succeeded())
-  #  jobs:
-  #    - ${{ if eq(parameters.PublishNuGet, true) }}:
-  #      - template: .ci/az-publish-nuget.yml
-  #        parameters:
-  #          displayName: NuGet Release
-  #          PublishNuGet: ${{ variables.PublishNuGet }}
-  #
-  #    - ${{ if eq(parameters.PublishGithub, true) }}:
-  #      - template: .ci/az-publish-github.yml
-  #        parameters:
-  #          displayName: GitHub Release
-  #          PublishGitHub: ${{ variables.PublishGitHub }}
+  - stage: Publication
+    displayName: Publication
+    dependsOn:
+      - Windows
+      - Linux
+    condition: and(or(eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true)), succeeded())
+    jobs:
+      - ${{ if eq(parameters.PublishNuGet, true) }}:
+        - template: .ci/az-publish-nuget.yml
+          parameters:
+            displayName: NuGet Release
+            PublishNuGet: ${{ variables.PublishNuGet }}
+  
+      - ${{ if eq(parameters.PublishGithub, true) }}:
+        - template: .ci/az-publish-github.yml
+          parameters:
+            displayName: GitHub Release
+            PublishGitHub: ${{ variables.PublishGitHub }}
