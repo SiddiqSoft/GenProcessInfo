@@ -91,7 +91,7 @@ jobs:
                 # add additional demands here
             
             variables:
-              cmakePreset: Linux-${{ compiler }}-${{ arch }}-${{ buildType }}
+              cmakePreset: Linux-${{ compiler }}-${{ buildType }}
               buildType: ${{ buildType }}
             
             steps:
