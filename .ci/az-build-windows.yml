@@ -63,7 +63,7 @@ jobs:
             pool:
               name: Default
               demands:
-                - startsWith( $(Agent.OS), 'Windows' )
+                - Agent.OS -equals Windows_NT
                 - Agent.OSArchitecture -equals ${{ arch }}
             variables:
               cmakePreset: Windows-${{ arch }}-${{ buildType }}
