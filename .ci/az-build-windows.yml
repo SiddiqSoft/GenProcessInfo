@@ -52,6 +52,21 @@ parameters:
 # JOBS
 # ============================================================================
 jobs:
+  - job:
+    displayName: "Debug"
+    steps:
+      - ${{ each arch in parameters.architectures }}:
+        - ${{ each compiler in parameters.compilers }}:
+          - ${{ each buildType in parameters.buildTypes }}:
+            - script: |
+                echo Agent.OS: $(Agent.OS)
+                echo Agent.OSArchitecture: $Agent.OSArchitecture
+                echo architecture: ${{ arch }}
+                echo compiler: ${{ compiler }}
+                echo buildType: ${{ buildType }}
+                echo cmakePreset: ${{ variables.cmakePreset }}
+              displayName: debug display variables
+      
   - ${{ each arch in parameters.architectures }}:
     - ${{ each compiler in parameters.compilers }}:
         - ${{ each buildType in parameters.buildTypes }}:
