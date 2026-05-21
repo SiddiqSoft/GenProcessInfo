@@ -185,7 +185,6 @@ stages:
         compilers: ${{ parameters.Compilers_Linux }}
         buildTypes: ${{ parameters.BuildTypes }}
         runTests: ${{ parameters.RunTests }}
-        publishNuGet: ${{ variables.PublishNuGet }}
         publishGitHub: ${{ variables.PublishGitHub }}
 
   # ==========================================================================

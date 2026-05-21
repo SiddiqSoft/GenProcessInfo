@@ -34,17 +34,29 @@
 parameters:
   - name: displayName
     type: string
-    
+
+  - name: architectures
+    type: stringList
+    default: [ x64, arm64 ]
+    values: [ x64, arm64 ]
+
+  - name: compilers
+    type: stringList
+    default: [ Clang ]
+    values: [ Clang, GCC ]
+
+  - name: buildTypes
+    type: stringList
+    default: [ Release, Debug ]
+    values: [ Release, Debug ]
+
   - name: runTests
     type: boolean
     default: true
-    
-  - name: Cleanup
+
+  - name: publishGitHub
     type: boolean
     default: false
-    
-  - name: matrixConfigs
-    type: object
 
 
 # ============================================================================
