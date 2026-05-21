@@ -154,7 +154,7 @@ jobs:
               - template: az-posttest-windows.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
-                  architecture: ${{ matrix.architecture }}
+                  architecture: ${{ architecture }}
               
               - task: PublishTestResults@2
                 displayName: Publish Test Results
