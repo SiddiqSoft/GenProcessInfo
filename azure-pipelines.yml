@@ -147,7 +147,10 @@ stages:
         parameters:
           displayName: "Windows Cleanup"
           BuildOperatingSystem: $(Agent.OS)
-          CleanupDirectory: ${{ variables.cpmCachePath }}
+          ${{ if eq(parameters.Cleanup, true) }}::
+            CleanupDirectory: ${{ variables.cpmCachePath }}
+          ${{ else }}:
+            CleanupDirectory: ''
 
       - template: .ci/az-build-windows.yml
         parameters:

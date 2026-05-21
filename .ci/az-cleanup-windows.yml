@@ -26,9 +26,10 @@ jobs:
   - job: Cleanup
     displayName: ${{ parameters.displayName }}
     
-    steps:
+    steps: 
       - task: PowerShell@2
         displayName: Cleanup Directory
+        condition: ne(length(${{ parameters.CleanupDirectory}}),0 ) # must be non-zeo
         inputs:
           targetType: inline
           script: |
