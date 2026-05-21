@@ -16,8 +16,8 @@ parameters:
   - name: BuildOperatingSystem
     type: string
 
-  - name: CleanupDirectories
-    type: stringList
+  - name: CleanupDirectory
+    type: string
     
 # ============================================================================
 # JOBS
@@ -38,7 +38,7 @@ jobs:
         inputs:
           targetType: inline
           script: |
-            $dirp= ${{ CleanupDirectories[0] }}
+            $dirp= ${{ parameters.CleanupDirectory }}
             Write-Host "Cleaning up ...$dirp"
             if (Test-Path -Path $dirp) {
               Remove-Item -Recurse -Force -LiteralPath $dirp
