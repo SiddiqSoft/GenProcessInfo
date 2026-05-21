@@ -9,10 +9,12 @@
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: architecture
+    type: string
+
   - name: runTests
     type: boolean
-    default: true
-    
+     
 steps:
   - task: CmdLine@2
     displayName: Nothing to do

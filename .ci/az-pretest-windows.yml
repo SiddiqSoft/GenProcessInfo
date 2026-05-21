@@ -9,7 +9,7 @@
 # PARAMETERS
 # ============================================================================
 parameters:
-  - name: thisArchitecture
+  - name: architecture
     type: string
 
   - name: runTests

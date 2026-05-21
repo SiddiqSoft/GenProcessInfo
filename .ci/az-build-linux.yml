@@ -105,7 +105,7 @@ jobs:
 
               - template: az-pretest-linux.yml
                 parameters:
-                  thisArchitecture: ${{ arch }}
+                  architecture: ${{ arch }}
                   runTests: ${{ parameters.runTests }}
             
               # ====================================================================

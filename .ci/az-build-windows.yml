@@ -110,7 +110,7 @@ jobs:
 
               - template: az-pretest-windows.yml
                 parameters:
-                  thisArchitecture: ${{ arch }}
+                  architecture: ${{ arch }}
                   runTests: ${{ parameters.runTests }}
               
               # ====================================================================
