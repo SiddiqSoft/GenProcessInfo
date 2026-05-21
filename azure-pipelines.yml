@@ -169,16 +169,16 @@ stages:
     dependsOn:
       - Windows
       #- Linux
-    condition: and(eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true), succeeded())
+    condition: and(or(eq(${{ parameters.PublishGithub }}, true), eq(${{ parameters.PublishNuGet }}, true)), succeeded())
     jobs:
-      # NuGet Release
-      - template: .ci/az-publish-nuget.yml
-        parameters:
-          displayName: NuGet Release
-          PublishNuGet: ${{ variables.PublishNuGet }}
+      - ${{ if eq(parameters.PublishNuGet, true) }}:
+        - template: .ci/az-publish-nuget.yml
+          parameters:
+            displayName: NuGet Release
+            PublishNuGet: ${{ variables.PublishNuGet }}
 
-      # GitHub Release
-      - template: .ci/az-publish-github.yml
-        parameters:
-          displayName: GitHub Release
-          PublishGitHub: ${{ variables.PublishGitHub }}
+      - ${{ if eq(parameters.PublishGithub, true) }}:
+        - template: .ci/az-publish-github.yml
+          parameters:
+            displayName: GitHub Release
+            PublishGitHub: ${{ variables.PublishGitHub }}
