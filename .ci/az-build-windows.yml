@@ -76,7 +76,7 @@ jobs:
               - task: BatchScript@1
                 displayName: Detect Visual Studio paths
                 inputs:
-                  filename: $(System.DefaultWorkingDirectory)/.ci/pipeline_detect_vs_path.bat
+                  filename: ../tests/pipeline_detect_vs_path.bat
                   modifyEnvironment: true
               
               - task: BatchScript@1
@@ -86,7 +86,7 @@ jobs:
                   arguments: $(AGENT_OSARCHITECTURE)
                   modifyEnvironment: true
 
-              - template: $(System.DefaultWorkingDirectory)/.ci/az-pretest-windows.yml
+              - template: az-pretest-windows.yml
                 parameters:
                   architecture: ${{ architecture }}
                   runTests: ${{ parameters.runTests }}
