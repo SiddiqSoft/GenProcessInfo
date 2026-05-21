@@ -109,13 +109,13 @@ jobs:
                   updateBuildNumber: true
               
               - script: |
-                  echo "Agent.OS: $(Agent.OS)"
-                  echo "Agent.OSArchitecture: $(Agent.OSArchitecture)"
-                  echo "architecture: ${{ architecture }}"
-                  echo "compiler: ${{ compiler }}"
-                  echo "buildType: ${{ buildType }}"
-                  echo "cmakePreset: ${{ cmakePreset }}"
-                displayName: Set GITVERSION_MAJORMINORPATCH variable
+                  echo "Agent.OS: $(Agent.OS)
+                  echo "Agent.OSArchitecture: $(Agent.OSArchitecture)
+                  echo "architecture: ${{ architecture }}
+                  echo "compiler: ${{ compiler }}
+                  echo "buildType: ${{ buildType }}
+                  echo "cmakePreset: ${{ cmakePreset }}
+                displayName: debug display variables
 
               # ====================================================================
               # Build
