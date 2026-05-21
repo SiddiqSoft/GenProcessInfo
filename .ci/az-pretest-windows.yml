@@ -19,8 +19,7 @@ steps:
   # ====================================================================
   # Emulator Setup (for tests)
   # ====================================================================
-  - task: BatchScript@1
-    displayName: Start Azure CosmosDB Emulator
+  - task: CmdLine@2
+    displayName: Nothing to do
     inputs:
-      filename: $(System.DefaultWorkingDirectory)/tests/setup-linux-emulator.bat
-    condition: and(succeeded(), eq(${{ parameters.runTests }}, true), ne('${{parameters.thisArchitecture}}', 'arm64')) # docker on arm64 not available yet    
+      script: echo "Nothing to do; add your startup tasks here."

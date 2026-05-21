@@ -9,13 +9,15 @@
 # PARAMETERS
 # ============================================================================
 parameters:
+  - name: architecture
+    type: string
+
   - name: runTests
     type: boolean
     default: true
     
 steps:
   - task: CmdLine@2
-    displayName: Stop Azure CosmosDB Emulator
+    displayName: Nothing to do
     inputs:
-      script: docker stop $(dockerContainerName)
-    #condition: ne('${{parameters.architecture}}', 'arm64') # docker on arm64 not available yet
+      script: echo "Nothing to do; add your cleanup such as docker shutdown here."
