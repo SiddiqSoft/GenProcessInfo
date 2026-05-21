@@ -151,7 +151,7 @@ jobs:
                 continueOnError: true
                 condition: and(succeeded(), eq(${{ parameters.runTests }}, true))
 
-              - template: $(System.DefaultWorkingDirectory)/.ci/az-posttest-windows.yml
+              - template: az-posttest-windows.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
                   architecture: ${{ matrix.architecture }}
