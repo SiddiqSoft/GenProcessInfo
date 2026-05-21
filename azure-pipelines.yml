@@ -206,3 +206,9 @@ stages:
           parameters:
             displayName: GitHub Release
             PublishGitHub: ${{ variables.PublishGitHub }}
+      - job: Finalize
+        displayName: Finalize Pipeline
+        condition: succeeded()
+        steps:
+          - script: echo "Pipeline completed successfully!"
+            displayName: "Finalize"
