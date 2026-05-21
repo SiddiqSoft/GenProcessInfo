@@ -192,7 +192,7 @@ jobs:
               - template: az-posttest-linux.yml
                 parameters:
                   runTests: ${{ parameters.runTests }}
-                  architecture: ${{ matrix.architecture }}
+                  architecture: ${{ arch }}
               
               # ====================================================================
               # CODE COVERAGE (Debug builds on x64 Linux only)
