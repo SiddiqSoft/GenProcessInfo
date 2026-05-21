@@ -22,21 +22,27 @@ parameters:
 
   - name: architectures
     type: object
+    default: [ x64, arm64 ]
 
   - name: compilers
     type: object
+    default: [ MSVC, Clang, GCC ]
 
   - name: buildTypes
     type: object
+    default: [ Release, Debug ]
 
   - name: runTests
     type: boolean
+    default: true
 
   - name: publishNuGet
     type: boolean
+    default: false
 
   - name: publishGitHub
     type: boolean
+    default: false
 
 
 # ============================================================================
