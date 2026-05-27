@@ -384,10 +384,17 @@ TEST(json, JSONSerialization)
 		EXPECT_TRUE(info.contains("memWorkingSet"));
 		EXPECT_TRUE(info.contains("memPrivateBytes"));
 		EXPECT_TRUE(info.contains("platform"));
-		EXPECT_TRUE(info.contains("architecture"));
 		EXPECT_TRUE(info.contains("timeStartup"));
 		EXPECT_TRUE(info.contains("timeCurrent"));
 		EXPECT_TRUE(info.contains("uptime"));
+
+		// Verify platform is a nested object with expected fields
+		EXPECT_TRUE(info["platform"].is_object());
+		EXPECT_TRUE(info["platform"].contains("name"));
+		EXPECT_TRUE(info["platform"].contains("architecture"));
+		EXPECT_TRUE(info["platform"].contains("osName"));
+		EXPECT_TRUE(info["platform"].contains("osVersion"));
+		EXPECT_TRUE(info["platform"].contains("osRelease"));
 
 		std::cerr << "JSON serialization successful" << std::endl;
 	}
@@ -431,17 +438,20 @@ TEST(json, JSONPlatformAndArchitecture)
 
 		nlohmann::json info(procInfo);
 
+		// Verify platform is a nested object
+		EXPECT_TRUE(info["platform"].is_object());
+
 		// Verify platform and architecture fields are present and match
-		EXPECT_EQ(info.value("platform", ""), procInfo.platformName);
-		EXPECT_EQ(info.value("architecture", ""), procInfo.platformArchitecture);
+		EXPECT_EQ(info["platform"].value("name", ""), procInfo.platformName);
+		EXPECT_EQ(info["platform"].value("architecture", ""), procInfo.platformArchitecture);
 
 		// Verify they are not empty
-		EXPECT_FALSE(info.value("platform", "").empty());
-		EXPECT_FALSE(info.value("architecture", "").empty());
+		EXPECT_FALSE(info["platform"].value("name", "").empty());
+		EXPECT_FALSE(info["platform"].value("architecture", "").empty());
 
 		// Verify they contain valid values
-		std::string platform = info.value("platform", "");
-		std::string architecture = info.value("architecture", "");
+		std::string platform = info["platform"].value("name", "");
+		std::string architecture = info["platform"].value("architecture", "");
 
 		EXPECT_TRUE(platform == "Win32" || platform == "Win64" || platform == "Linux" || 
 		            platform == "MacOS" || platform == "UNIX" || platform == "Unknown");
@@ -465,22 +475,18 @@ TEST(json, JSONOSDetails)
 
 		nlohmann::json info(procInfo);
 
-		// Verify OS detail fields are present in JSON
-		// Note: These fields may be empty on Windows, but should be present
-		EXPECT_TRUE(info.contains("osName") || !procInfo.platformOSName.empty());
-		EXPECT_TRUE(info.contains("release") || !procInfo.platformRelease.empty());
-		EXPECT_TRUE(info.contains("version") || !procInfo.platformVersion.empty());
+		// Verify platform is a nested object
+		EXPECT_TRUE(info["platform"].is_object());
+
+		// Verify OS detail fields are present in the nested platform object
+		EXPECT_TRUE(info["platform"].contains("osName"));
+		EXPECT_TRUE(info["platform"].contains("osRelease"));
+		EXPECT_TRUE(info["platform"].contains("osVersion"));
 
 		// Verify field values match the object members
-		if (info.contains("osName")) {
-			EXPECT_EQ(info.value("osName", ""), procInfo.platformOSName);
-		}
-		if (info.contains("release")) {
-			EXPECT_EQ(info.value("release", ""), procInfo.platformRelease);
-		}
-		if (info.contains("version")) {
-			EXPECT_EQ(info.value("version", ""), procInfo.platformVersion);
-		}
+		EXPECT_EQ(info["platform"].value("osName", ""), procInfo.platformOSName);
+		EXPECT_EQ(info["platform"].value("osRelease", ""), procInfo.platformRelease);
+		EXPECT_EQ(info["platform"].value("osVersion", ""), procInfo.platformVersion);
 
 		// On Unix/Linux systems, these should be populated
 #if defined(__unix__) || defined(__APPLE__) || defined(__linux__)

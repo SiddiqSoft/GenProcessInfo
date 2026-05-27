@@ -454,51 +454,47 @@ namespace siddiqsoft
 	/// @param gpi Our source object
 	static void to_json(nlohmann::json& dest, const GenProcessInfo& gpi)
 	{
-		dest = nlohmann::json {{"processId", gpi.processId},
-		                       {"hostname", gpi.nameHostname},
-		                       {"fqdn", gpi.nameFqdn},
-		                       {"domain", gpi.nameDomainName},
-		                       {"localFqdn", gpi.nameHostnamePhysical},
-		                       {"cpuHandles", gpi.cpuHandles},
-		                       {"cpuThreads", gpi.cpuThreads},
-		                       {"cpuCores", gpi.cpuCores},
-		                       {"memPeakWorkingSet", gpi.memPeakWorkingSet},
-		                       {"memWorkingSet", gpi.memWorkingSet},
-		                       {"memPrivateBytes", gpi.memPrivate},
-		                       {"platform", gpi.platformName},
-		                       {"architecture", gpi.platformArchitecture},
-		                       {"osName", gpi.platformOSName},
-		                       {"osVersion", gpi.platformVersion},
-		                       {"osRelease", gpi.platformRelease},
+		dest = nlohmann::json
+		{
+			{"processId", gpi.processId}, {"hostname", gpi.nameHostname}, {"fqdn", gpi.nameFqdn}, {"domain", gpi.nameDomainName},
+			        {"localFqdn", gpi.nameHostnamePhysical}, {"cpuHandles", gpi.cpuHandles}, {"cpuThreads", gpi.cpuThreads},
+			        {"cpuCores", gpi.cpuCores}, {"memPeakWorkingSet", gpi.memPeakWorkingSet}, {"memWorkingSet", gpi.memWorkingSet},
+			        {"memPrivateBytes", gpi.memPrivate},
+			        {"platform",
+			         {{"name", gpi.platformName},
+			          {"architecture", gpi.platformArchitecture},
+			          {"osName", gpi.platformOSName},
+			          {"osVersion", gpi.platformVersion},
+			          {"osRelease", gpi.platformRelease}},
 
 #if __cpp_lib_format
-		                       {"timeStartup", std::format("{:%FT%T}Z", gpi.timeStartup)},
-		                       {"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
+			         {"timeStartup", std::format("{:%FT%T}Z", gpi.timeStartup)},
+			         {"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
 #endif
-		                       {"uptime", std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count()}};
-	}
+			         {"uptime", std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count()}};
+		}
 #endif
-} // namespace siddiqsoft
+	} // namespace siddiqsoft
 
 
-/// @brief Specialization of std::formatter for GenProcessInfo objects.
-template <class charT>
-struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::string, charT>
-{
-	/// @brief Format a GenProcessInfo object using the standard format interface.
-	template <class FC>
-	auto format(const siddiqsoft::GenProcessInfo& gpi, FC& ctx) const
+	/// @brief Specialization of std::formatter for GenProcessInfo objects.
+	template <class charT>
+	struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::string, charT>
 	{
+		/// @brief Format a GenProcessInfo object using the standard format interface.
+		template <class FC>
+		auto format(const siddiqsoft::GenProcessInfo& gpi, FC& ctx) const
+		{
 #if defined INCLUDE_NLOHMANN_JSON_HPP_
-		return std::formatter<std::string, charT>::format(nlohmann::json(gpi).dump(), ctx);
+			return std::formatter<std::string, charT>::format(nlohmann::json(gpi).dump(), ctx);
 #else
 		std::string s;
 
 		// First element
 		std::format_to(std::back_inserter(s), "{{\"processId\":{}", gpi.processId);
 		std::format_to(std::back_inserter(s), ",\"hostname\":\"{}\",", gpi.nameHostname);
-		std::format_to(std::back_inserter(s), ",\"domain\":\"{}\",", gpi.nameDomainName);
 		std::format_to(std::back_inserter(s), ",\"fqdn\":\"{}\",", gpi.nameFqdn);
+		std::format_to(std::back_inserter(s), ",\"domain\":\"{}\",", gpi.nameDomainName);
 		std::format_to(std::back_inserter(s), ",\"localFqdn\":\"{}\",", gpi.nameHostnamePhysical);
 		std::format_to(std::back_inserter(s), ",\"cpuHandles\":{},", gpi.cpuHandles);
 		std::format_to(std::back_inserter(s), ",\"cpuThreads\":{},", gpi.cpuThreads);
@@ -506,13 +502,20 @@ struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::s
 		std::format_to(std::back_inserter(s), ",\"memPeakWorkingSet\":{},", gpi.memPeakWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memWorkingSet\":{},", gpi.memWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memPrivateBytes\":{},", gpi.memPrivate);
-		std::format_to(std::back_inserter(s), ",\"platform\":\"{}\",", gpi.platformName);
-		std::format_to(std::back_inserter(s), ",\"architecture\":\"{}\",", gpi.platformArchitecture);
-		std::format_to(std::back_inserter(s), ",\"osName\":\"{}\",", gpi.platformOSName);
-		std::format_to(std::back_inserter(s), ",\"osRelease\":\"{}\",", gpi.platformRelease);
-		std::format_to(std::back_inserter(s), ",\"osVersion\":\"{}\",", gpi.platformVersion);
+		
+		// Nested platform object
+		std::format_to(std::back_inserter(s), ",\"platform\":{{");
+		std::format_to(std::back_inserter(s), "\"name\":\"{}\",", gpi.platformName);
+		std::format_to(std::back_inserter(s), "\"architecture\":\"{}\",", gpi.platformArchitecture);
+		std::format_to(std::back_inserter(s), "\"osName\":\"{}\",", gpi.platformOSName);
+		std::format_to(std::back_inserter(s), "\"osVersion\":\"{}\",", gpi.platformVersion);
+		std::format_to(std::back_inserter(s), "\"osRelease\":\"{}\"", gpi.platformRelease);
+		std::format_to(std::back_inserter(s), "}}");
+		
+#if __cpp_lib_format
 		std::format_to(std::back_inserter(s), ",\"timeStartup\":\"{:%FT%T}Z\"", gpi.timeStartup);
 		std::format_to(std::back_inserter(s), ",\"timeCurrent\":\"{:%FT%T}Z\"", std::chrono::system_clock::now());
+#endif
 
 		// last element
 		std::format_to(std::back_inserter(s),
@@ -520,5 +523,5 @@ struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::s
 		               std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count());
 		return std::formatter<std::string, charT>::format(s, ctx);
 #endif
-	}
-};
+		}
+	};
