@@ -371,30 +371,38 @@ TEST(json, JSONSerialization)
 
 		nlohmann::json info(procInfo);
 
-		// Verify all expected fields are present
-		EXPECT_TRUE(info.contains("processId"));
-		EXPECT_TRUE(info.contains("hostname"));
-		EXPECT_TRUE(info.contains("fqdn"));
-		EXPECT_TRUE(info.contains("domain"));
-		EXPECT_TRUE(info.contains("localFqdn"));
-		EXPECT_TRUE(info.contains("cpuHandles"));
-		EXPECT_TRUE(info.contains("cpuThreads"));
-		EXPECT_TRUE(info.contains("cpuCores"));
-		EXPECT_TRUE(info.contains("memPeakWorkingSet"));
-		EXPECT_TRUE(info.contains("memWorkingSet"));
-		EXPECT_TRUE(info.contains("memPrivateBytes"));
+		// Verify all expected top-level nested objects are present
+		EXPECT_TRUE(info.contains("process"));
+		EXPECT_TRUE(info.contains("host"));
 		EXPECT_TRUE(info.contains("platform"));
 		EXPECT_TRUE(info.contains("timeStartup"));
 		EXPECT_TRUE(info.contains("timeCurrent"));
 		EXPECT_TRUE(info.contains("uptime"));
 
+		// Verify process is a nested object with expected fields
+		EXPECT_TRUE(info["process"].is_object());
+		EXPECT_TRUE(info["process"].contains("processId"));
+		EXPECT_TRUE(info["process"].contains("cpuHandles"));
+		EXPECT_TRUE(info["process"].contains("cpuThreads"));
+		EXPECT_TRUE(info["process"].contains("cpuCores"));
+		EXPECT_TRUE(info["process"].contains("memPeakWorkingSet"));
+		EXPECT_TRUE(info["process"].contains("memWorkingSet"));
+		EXPECT_TRUE(info["process"].contains("memPrivateBytes"));
+
+		// Verify host is a nested object with expected fields
+		EXPECT_TRUE(info["host"].is_object());
+		EXPECT_TRUE(info["host"].contains("hostname"));
+		EXPECT_TRUE(info["host"].contains("fqdn"));
+		EXPECT_TRUE(info["host"].contains("domain"));
+		EXPECT_TRUE(info["host"].contains("localFqdn"));
+
 		// Verify platform is a nested object with expected fields
 		EXPECT_TRUE(info["platform"].is_object());
-		EXPECT_TRUE(info["platform"].contains("name"));
+		EXPECT_TRUE(info["platform"].contains("platform"));
 		EXPECT_TRUE(info["platform"].contains("architecture"));
-		EXPECT_TRUE(info["platform"].contains("osName"));
-		EXPECT_TRUE(info["platform"].contains("osVersion"));
-		EXPECT_TRUE(info["platform"].contains("osRelease"));
+		EXPECT_TRUE(info["platform"].contains("name"));
+		EXPECT_TRUE(info["platform"].contains("version"));
+		EXPECT_TRUE(info["platform"].contains("release"));
 
 		std::cerr << "JSON serialization successful" << std::endl;
 	}
@@ -413,13 +421,13 @@ TEST(json, JSONFieldValues)
 
 		nlohmann::json info(procInfo);
 
-		// Verify field values
-		EXPECT_EQ(info.value("processId", 0), siddiqsoft::GenProcessInfo::GetProcessId());
-		EXPECT_EQ(info.value("hostname", ""), procInfo.nameHostname);
-		EXPECT_EQ(info.value("fqdn", ""), procInfo.nameFqdn);
-		EXPECT_EQ(info.value("cpuCores", 0), procInfo.cpuCores);
-		EXPECT_EQ(info.value("cpuThreads", 0), procInfo.cpuThreads);
-		EXPECT_EQ(info.value("memWorkingSet", 0), procInfo.memWorkingSet);
+		// Verify field values in nested objects
+		EXPECT_EQ(info["process"].value("processId", 0), siddiqsoft::GenProcessInfo::GetProcessId());
+		EXPECT_EQ(info["host"].value("hostname", ""), procInfo.nameHostname);
+		EXPECT_EQ(info["host"].value("fqdn", ""), procInfo.nameFqdn);
+		EXPECT_EQ(info["process"].value("cpuCores", 0), procInfo.cpuCores);
+		EXPECT_EQ(info["process"].value("cpuThreads", 0), procInfo.cpuThreads);
+		EXPECT_EQ(info["process"].value("memWorkingSet", 0), procInfo.memWorkingSet);
 
 		std::cerr << "JSON field values verified" << std::endl;
 	}
@@ -442,15 +450,15 @@ TEST(json, JSONPlatformAndArchitecture)
 		EXPECT_TRUE(info["platform"].is_object());
 
 		// Verify platform and architecture fields are present and match
-		EXPECT_EQ(info["platform"].value("name", ""), procInfo.platformName);
+		EXPECT_EQ(info["platform"].value("platform", ""), procInfo.platformName);
 		EXPECT_EQ(info["platform"].value("architecture", ""), procInfo.platformArchitecture);
 
 		// Verify they are not empty
-		EXPECT_FALSE(info["platform"].value("name", "").empty());
+		EXPECT_FALSE(info["platform"].value("platform", "").empty());
 		EXPECT_FALSE(info["platform"].value("architecture", "").empty());
 
 		// Verify they contain valid values
-		std::string platform = info["platform"].value("name", "");
+		std::string platform = info["platform"].value("platform", "");
 		std::string architecture = info["platform"].value("architecture", "");
 
 		EXPECT_TRUE(platform == "Win32" || platform == "Win64" || platform == "Linux" || 
@@ -479,14 +487,14 @@ TEST(json, JSONOSDetails)
 		EXPECT_TRUE(info["platform"].is_object());
 
 		// Verify OS detail fields are present in the nested platform object
-		EXPECT_TRUE(info["platform"].contains("osName"));
-		EXPECT_TRUE(info["platform"].contains("osRelease"));
-		EXPECT_TRUE(info["platform"].contains("osVersion"));
+		EXPECT_TRUE(info["platform"].contains("name"));
+		EXPECT_TRUE(info["platform"].contains("release"));
+		EXPECT_TRUE(info["platform"].contains("version"));
 
 		// Verify field values match the object members
-		EXPECT_EQ(info["platform"].value("osName", ""), procInfo.platformOSName);
-		EXPECT_EQ(info["platform"].value("osRelease", ""), procInfo.platformRelease);
-		EXPECT_EQ(info["platform"].value("osVersion", ""), procInfo.platformVersion);
+		EXPECT_EQ(info["platform"].value("name", ""), procInfo.platformOSName);
+		EXPECT_EQ(info["platform"].value("release", ""), procInfo.platformRelease);
+		EXPECT_EQ(info["platform"].value("version", ""), procInfo.platformVersion);
 
 		// On Unix/Linux systems, these should be populated
 #if defined(__unix__) || defined(__APPLE__) || defined(__linux__)
@@ -758,7 +766,7 @@ TEST(examples, Example2)
 		nlohmann::json info(procInfo);
 
 		std::cerr << info.dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetProcessId(), info.value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetProcessId(), info["process"].value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)
@@ -777,7 +785,7 @@ TEST(examples, Example3)
 		procInfo.snapshot();
 
 		std::cerr << nlohmann::json(procInfo).dump(4) << std::endl;
-		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetProcessId(), nlohmann::json(procInfo).value("processId", 0));
+		EXPECT_EQ(siddiqsoft::GenProcessInfo::GetProcessId(), nlohmann::json(procInfo)["process"].value("processId", 0));
 		std::cerr << std::format("{} - Contents:{}\n", __func__, procInfo);
 	}
 	catch (std::exception& e)

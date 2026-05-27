@@ -456,23 +456,34 @@ namespace siddiqsoft
 	{
 		dest = nlohmann::json
 		{
-			{"processId", gpi.processId}, {"hostname", gpi.nameHostname}, {"fqdn", gpi.nameFqdn}, {"domain", gpi.nameDomainName},
-			        {"localFqdn", gpi.nameHostnamePhysical}, {"cpuHandles", gpi.cpuHandles}, {"cpuThreads", gpi.cpuThreads},
-			        {"cpuCores", gpi.cpuCores}, {"memPeakWorkingSet", gpi.memPeakWorkingSet}, {"memWorkingSet", gpi.memWorkingSet},
-			        {"memPrivateBytes", gpi.memPrivate},
+			{"process",
+			 {{"processId", gpi.processId},
+			  {"cpuHandles", gpi.cpuHandles},
+			  {"cpuThreads", gpi.cpuThreads},
+			  {"cpuCores", gpi.cpuCores},
+			  {"memPeakWorkingSet", gpi.memPeakWorkingSet},
+			  {"memWorkingSet", gpi.memWorkingSet},
+			  {"memPrivateBytes", gpi.memPrivate}}},
+			        {"host",
+			         {
+			                 {"hostname", gpi.nameHostname},
+			                 {"fqdn", gpi.nameFqdn},
+			                 {"domain", gpi.nameDomainName},
+			                 {"localFqdn", gpi.nameHostnamePhysical},
+			         }},
 			        {"platform",
-			         {{"name", gpi.platformName},
+			         {{"platform", gpi.platformName},
 			          {"architecture", gpi.platformArchitecture},
-			          {"osName", gpi.platformOSName},
-			          {"osVersion", gpi.platformVersion},
-			          {"osRelease", gpi.platformRelease}},
+			          {"name", gpi.platformOSName},
+			          {"version", gpi.platformVersion},
+			          {"release", gpi.platformRelease}}},
 
 #if __cpp_lib_format
 			         {"timeStartup", std::format("{:%FT%T}Z", gpi.timeStartup)},
 			         {"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
 #endif
 			         {"uptime", std::chrono::duration_cast<std::chrono::microseconds>(gpi.uptime()).count()}};
-		}
+		} // to_json()
 #endif
 	} // namespace siddiqsoft
 
@@ -502,7 +513,7 @@ namespace siddiqsoft
 		std::format_to(std::back_inserter(s), ",\"memPeakWorkingSet\":{},", gpi.memPeakWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memWorkingSet\":{},", gpi.memWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memPrivateBytes\":{},", gpi.memPrivate);
-		
+
 		// Nested platform object
 		std::format_to(std::back_inserter(s), ",\"platform\":{{");
 		std::format_to(std::back_inserter(s), "\"name\":\"{}\",", gpi.platformName);
@@ -511,7 +522,7 @@ namespace siddiqsoft
 		std::format_to(std::back_inserter(s), "\"osVersion\":\"{}\",", gpi.platformVersion);
 		std::format_to(std::back_inserter(s), "\"osRelease\":\"{}\"", gpi.platformRelease);
 		std::format_to(std::back_inserter(s), "}}");
-		
+
 #if __cpp_lib_format
 		std::format_to(std::back_inserter(s), ",\"timeStartup\":\"{:%FT%T}Z\"", gpi.timeStartup);
 		std::format_to(std::back_inserter(s), ",\"timeCurrent\":\"{:%FT%T}Z\"", std::chrono::system_clock::now());
