@@ -58,6 +58,7 @@
 #include <dirent.h>
 #include <cstring>
 #include <pthread.h>
+#include <sys/utsname.h>
 #define SIDDIQSOFT_UNIX 1
 #endif
 
@@ -88,6 +89,11 @@ namespace siddiqsoft
 #if defined(SIDDIQSOFT_WINDOWS)
 		HANDLE processHandle {NULL}; ///< Handle to the current process (Windows only)
 #endif
+		std::string platformName {};
+		std::string platformOSName {};
+		std::string platformRelease {};
+		std::string platformVersion {};
+		std::string platformArchitecture {};
 
 	public:
 		/// @brief Default constructor that initializes process information.
@@ -99,6 +105,33 @@ namespace siddiqsoft
 			initializeWindows();
 #else
 			initializeUnix();
+#endif
+
+			// Determine the platform Name
+#if defined(_WIN32)
+			platformName = "Win32";
+#elif defined(_WIN64)
+			platformName = "Win64";
+#elif defined(__linux__)
+			platformName = "Linux";
+#elif defined(__APPLE__) && defined(__MACH__)
+			platformName = "MacOS";
+#elif defined(__unix__)
+			platformName = "UNIX";
+#else
+			platformName = "Unknown";
+#endif
+
+#if defined(_M_X64) || defined(__x86_64__)
+			platformArchitecture = "AMD64";
+#elif defined(_M_IX86) || defined(__i386__)
+			platformArchitecture = "X86";
+#elif defined(_M_ARM64) || defined(__aarch64__)
+			platformArchitecture = "ARM64";
+#elif defined(_M_ARM) || defined(__arm__)
+			platformArchitecture = "ARM";
+#else
+			platformArchitecture = "Unknown";
 #endif
 		}
 
@@ -296,7 +329,10 @@ namespace siddiqsoft
 			// Try to get FQDN
 			struct utsname uts {};
 			if (uname(&uts) == 0) {
-				nameFqdn = uts.nodename;
+				nameFqdn        = uts.nodename;
+				platformOSName  = uts.sysname;
+				platformRelease = uts.release;
+				platformVersion = uts.version;
 			}
 
 			// Extract domain name from FQDN if available
@@ -429,6 +465,12 @@ namespace siddiqsoft
 		                       {"memPeakWorkingSet", gpi.memPeakWorkingSet},
 		                       {"memWorkingSet", gpi.memWorkingSet},
 		                       {"memPrivateBytes", gpi.memPrivate},
+		                       {"platform", gpi.platformName},
+		                       {"architecture", gpi.platformArchitecture},
+		                       {"osName", gpi.platformOSName},
+		                       {"osVersion", gpi.platformVersion},
+		                       {"osRelease", gpi.platformRelease},
+
 #if __cpp_lib_format
 		                       {"timeStartup", std::format("{:%FT%T}Z", gpi.timeStartup)},
 		                       {"timeCurrent", std::format("{:%FT%T}Z", std::chrono::system_clock::now())},
@@ -464,8 +506,14 @@ struct std::formatter<siddiqsoft::GenProcessInfo, charT> : std::formatter<std::s
 		std::format_to(std::back_inserter(s), ",\"memPeakWorkingSet\":{},", gpi.memPeakWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memWorkingSet\":{},", gpi.memWorkingSet);
 		std::format_to(std::back_inserter(s), ",\"memPrivateBytes\":{},", gpi.memPrivate);
+		std::format_to(std::back_inserter(s), ",\"platform\":\"{}\",", gpi.platformName);
+		std::format_to(std::back_inserter(s), ",\"architecture\":\"{}\",", gpi.platformArchitecture);
+		std::format_to(std::back_inserter(s), ",\"osName\":\"{}\",", gpi.platformOSName);
+		std::format_to(std::back_inserter(s), ",\"osRelease\":\"{}\",", gpi.platformRelease);
+		std::format_to(std::back_inserter(s), ",\"osVersion\":\"{}\",", gpi.platformVersion);
 		std::format_to(std::back_inserter(s), ",\"timeStartup\":\"{:%FT%T}Z\"", gpi.timeStartup);
 		std::format_to(std::back_inserter(s), ",\"timeCurrent\":\"{:%FT%T}Z\"", std::chrono::system_clock::now());
+
 		// last element
 		std::format_to(std::back_inserter(s),
 		               ",\"uptime\":{}}}",

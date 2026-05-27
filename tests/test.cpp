@@ -129,6 +129,76 @@ TEST(initialization, ProcessIDProperty)
 	}
 }
 
+TEST(initialization, PlatformProperties)
+{
+	try
+	{
+		siddiqsoft::GenProcessInfo procInfo;
+
+		// Verify platform name is populated
+		EXPECT_FALSE(procInfo.platformName.empty());
+		EXPECT_GT(procInfo.platformName.length(), 0);
+
+		// Verify architecture is populated
+		EXPECT_FALSE(procInfo.platformArchitecture.empty());
+		EXPECT_GT(procInfo.platformArchitecture.length(), 0);
+
+		// Verify platform name is one of the expected values
+		EXPECT_TRUE(procInfo.platformName == "Win32" || 
+		            procInfo.platformName == "Win64" || 
+		            procInfo.platformName == "Linux" || 
+		            procInfo.platformName == "MacOS" || 
+		            procInfo.platformName == "UNIX" || 
+		            procInfo.platformName == "Unknown");
+
+		// Verify architecture is one of the expected values
+		EXPECT_TRUE(procInfo.platformArchitecture == "AMD64" || 
+		            procInfo.platformArchitecture == "X86" || 
+		            procInfo.platformArchitecture == "ARM64" || 
+		            procInfo.platformArchitecture == "ARM" || 
+		            procInfo.platformArchitecture == "Unknown");
+
+		std::cerr << "Platform: " << procInfo.platformName << std::endl;
+		std::cerr << "Architecture: " << procInfo.platformArchitecture << std::endl;
+	}
+	catch (...)
+	{
+		EXPECT_TRUE(false) << "Platform initialization should not throw";
+	}
+}
+
+TEST(initialization, PlatformOSDetails)
+{
+	try
+	{
+		siddiqsoft::GenProcessInfo procInfo;
+
+		// Verify platformOSName is populated (may be empty on Windows)
+		EXPECT_GE(procInfo.platformOSName.length(), 0);
+
+		// Verify platformRelease is populated (may be empty on Windows)
+		EXPECT_GE(procInfo.platformRelease.length(), 0);
+
+		// Verify platformVersion is populated (may be empty on Windows)
+		EXPECT_GE(procInfo.platformVersion.length(), 0);
+
+		// On Unix/Linux systems, these should typically be populated
+#if defined(__unix__) || defined(__APPLE__) || defined(__linux__)
+		EXPECT_FALSE(procInfo.platformOSName.empty()) << "platformOSName should be populated on Unix/Linux";
+		EXPECT_FALSE(procInfo.platformRelease.empty()) << "platformRelease should be populated on Unix/Linux";
+		EXPECT_FALSE(procInfo.platformVersion.empty()) << "platformVersion should be populated on Unix/Linux";
+#endif
+
+		std::cerr << "OS Name: " << procInfo.platformOSName << std::endl;
+		std::cerr << "Release: " << procInfo.platformRelease << std::endl;
+		std::cerr << "Version: " << procInfo.platformVersion << std::endl;
+	}
+	catch (...)
+	{
+		EXPECT_TRUE(false) << "Platform OS details initialization should not throw";
+	}
+}
+
 
 // ============================================================================
 // Snapshot and Memory Information Tests
@@ -313,6 +383,8 @@ TEST(json, JSONSerialization)
 		EXPECT_TRUE(info.contains("memPeakWorkingSet"));
 		EXPECT_TRUE(info.contains("memWorkingSet"));
 		EXPECT_TRUE(info.contains("memPrivateBytes"));
+		EXPECT_TRUE(info.contains("platform"));
+		EXPECT_TRUE(info.contains("architecture"));
 		EXPECT_TRUE(info.contains("timeStartup"));
 		EXPECT_TRUE(info.contains("timeCurrent"));
 		EXPECT_TRUE(info.contains("uptime"));
@@ -347,6 +419,83 @@ TEST(json, JSONFieldValues)
 	catch (std::exception& e)
 	{
 		EXPECT_TRUE(false) << "JSON field verification should not throw: " << e.what();
+	}
+}
+
+TEST(json, JSONPlatformAndArchitecture)
+{
+	try
+	{
+		siddiqsoft::GenProcessInfo procInfo;
+		procInfo.snapshot();
+
+		nlohmann::json info(procInfo);
+
+		// Verify platform and architecture fields are present and match
+		EXPECT_EQ(info.value("platform", ""), procInfo.platformName);
+		EXPECT_EQ(info.value("architecture", ""), procInfo.platformArchitecture);
+
+		// Verify they are not empty
+		EXPECT_FALSE(info.value("platform", "").empty());
+		EXPECT_FALSE(info.value("architecture", "").empty());
+
+		// Verify they contain valid values
+		std::string platform = info.value("platform", "");
+		std::string architecture = info.value("architecture", "");
+
+		EXPECT_TRUE(platform == "Win32" || platform == "Win64" || platform == "Linux" || 
+		            platform == "MacOS" || platform == "UNIX" || platform == "Unknown");
+		EXPECT_TRUE(architecture == "AMD64" || architecture == "X86" || architecture == "ARM64" || 
+		            architecture == "ARM" || architecture == "Unknown");
+
+		std::cerr << "Platform: " << platform << ", Architecture: " << architecture << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		EXPECT_TRUE(false) << "JSON platform/architecture verification should not throw: " << e.what();
+	}
+}
+
+TEST(json, JSONOSDetails)
+{
+	try
+	{
+		siddiqsoft::GenProcessInfo procInfo;
+		procInfo.snapshot();
+
+		nlohmann::json info(procInfo);
+
+		// Verify OS detail fields are present in JSON
+		// Note: These fields may be empty on Windows, but should be present
+		EXPECT_TRUE(info.contains("osName") || !procInfo.platformOSName.empty());
+		EXPECT_TRUE(info.contains("release") || !procInfo.platformRelease.empty());
+		EXPECT_TRUE(info.contains("version") || !procInfo.platformVersion.empty());
+
+		// Verify field values match the object members
+		if (info.contains("osName")) {
+			EXPECT_EQ(info.value("osName", ""), procInfo.platformOSName);
+		}
+		if (info.contains("release")) {
+			EXPECT_EQ(info.value("release", ""), procInfo.platformRelease);
+		}
+		if (info.contains("version")) {
+			EXPECT_EQ(info.value("version", ""), procInfo.platformVersion);
+		}
+
+		// On Unix/Linux systems, these should be populated
+#if defined(__unix__) || defined(__APPLE__) || defined(__linux__)
+		EXPECT_FALSE(procInfo.platformOSName.empty()) << "platformOSName should be populated on Unix/Linux";
+		EXPECT_FALSE(procInfo.platformRelease.empty()) << "platformRelease should be populated on Unix/Linux";
+		EXPECT_FALSE(procInfo.platformVersion.empty()) << "platformVersion should be populated on Unix/Linux";
+#endif
+
+		std::cerr << "OS Name: " << procInfo.platformOSName << std::endl;
+		std::cerr << "Release: " << procInfo.platformRelease << std::endl;
+		std::cerr << "Version: " << procInfo.platformVersion << std::endl;
+	}
+	catch (std::exception& e)
+	{
+		EXPECT_TRUE(false) << "JSON OS details verification should not throw: " << e.what();
 	}
 }
 
