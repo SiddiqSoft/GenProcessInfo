@@ -3,7 +3,7 @@
 #   See LICENSE file
 #
 #   When building from our CI server, the following options must be set:
-#   - genericprocinfo_BUILD_TESTS=ON
+#   - GenProcessInfo_BUILD_TESTS=ON
 #   - CI_BUILDID must be set to the gitversion
 # 
 cmake_minimum_required(VERSION 3.29)
@@ -23,6 +23,7 @@ project(GenProcessInfo
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Build options
 option(${PROJECT_NAME}_BUILD_TESTS "Build tests for ${PROJECT_NAME}" OFF)
@@ -41,10 +42,11 @@ target_include_directories(${PROJECT_NAME}
 # Compile features and options
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_23)
 
-# Clang-specific options for experimental library features
-target_compile_options(${PROJECT_NAME}
-    INTERFACE
-    $<$<CXX_COMPILER_ID:Clang>:-fexperimental-library>)
+# ____________________________________
+# Dependencies
+# Here we explicitly declare that we depend on the nlohmann_json package and that
+# the client will only need to depend on our file where the nlohmann_json will
+# automatically included.
 
 
 # Testing configuration
